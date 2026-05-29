@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Oś liczbowa - SchoolTools</title>
+    <script src="../../shared/config.js"></script>
+    <script src="../../shared/theme.js"></script>
+    <script src="../../shared/assignment-api.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="page__header">
+        <div>
+          <p class="page__eyebrow" data-brand-name>SchoolTools</p>
+          <h1>Oś liczbowa</h1>
+          <p class="page__lead">
+            Poćwicz zaznaczanie liczb na osi i odczytywanie współrzędnych
+            punktów.
+          </p>
+        </div>
+        <a class="page__back" href="../../index.html">Powrót do listy narzędzi</a>
+      </header>
+
+      <section
+        id="assignment-panel"
+        class="assignment-panel"
+        aria-label="Informacje o zadaniu"
+        hidden
+      >
+        <div class="assignment-panel__header">
+          <div>
+            <p class="assignment-panel__eyebrow">Tryb zadania</p>
+            <h2 id="assignment-title">Zadanie nauczyciela</h2>
+            <p id="assignment-description" class="assignment-panel__text"></p>
+          </div>
+          <div class="assignment-progress">
+            <span>Postęp</span>
+            <strong id="assignment-progress-value">0 / 0</strong>
+          </div>
+        </div>
+
+        <section id="student-setup" class="student-setup">
+          <label class="field">
+            <span>Wybierz swoje imię i nazwisko</span>
+            <select id="student-select">
+              <option value="">Wybierz ucznia</option>
+            </select>
+          </label>
+          <button id="start-assignment-button" type="button">
+            Rozpocznij zadanie
+          </button>
+        </section>
+
+        <output id="assignment-feedback" class="feedback" aria-live="polite">
+          Trwa wczytywanie ustawień zadania.
+        </output>
+      </section>
+
+      <section
+        id="toolbar"
+        class="toolbar"
+        aria-label="Ustawienia ćwiczenia"
+      >
+        <label class="field">
+          <span>Ilość punktów</span>
+          <select id="point-count-select">
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Typ liczb</span>
+          <select id="task-type-select">
+            <option value="natural">Liczby naturalne</option>
+            <option value="integer" selected>Liczby całkowite</option>
+            <option value="commonFraction">Ułamki zwykłe</option>
+            <option value="decimal">Ułamki dziesiętne</option>
+            <option value="rational">Liczby wymierne</option>
+          </select>
+        </label>
+        <button id="all-new-task-button" type="button">Nowe zadanie</button>
+      </section>
+
+      <section class="exercise-grid" aria-label="Ćwiczenia na osi liczbowej">
+        <article class="exercise-panel">
+          <header class="exercise-panel__header">
+            <div>
+              <h2>Zaznacz liczby</h2>
+              <p>Przeciągnij punkty na właściwe miejsca na osi liczbowej.</p>
+            </div>
+          </header>
+
+          <section class="task-card">
+            <h3>Twoje liczby</h3>
+            <p id="placement-task-text" class="task-card__text"></p>
+            <div id="placement-task-formula" class="task-card__formula"></div>
+          </section>
+
+          <div
+            id="placement-board"
+            class="board"
+            role="img"
+            aria-label="Interaktywna oś liczbowa do zaznaczania liczb"
+          ></div>
+
+          <div class="actions">
+            <button id="placement-check-button" type="button">Sprawdź</button>
+          </div>
+
+          <output id="placement-feedback" class="feedback" aria-live="polite">
+            Ustaw punkty i sprawdź swoje odpowiedzi.
+          </output>
+        </article>
+
+        <article class="exercise-panel">
+          <header class="exercise-panel__header">
+            <div>
+              <h2>Odczytaj współrzędne</h2>
+              <p>Spójrz na zaznaczone punkty i wpisz ich współrzędne.</p>
+            </div>
+          </header>
+
+          <div
+            id="reading-board"
+            class="board"
+            role="img"
+            aria-label="Oś liczbowa z zaznaczonymi punktami do odczytania"
+          ></div>
+
+          <section class="reading-inputs" aria-label="Pola odpowiedzi">
+            <div id="reading-input-list" class="reading-input-list"></div>
+          </section>
+
+          <div class="actions">
+            <button id="reading-check-button" type="button">Sprawdź</button>
+          </div>
+
+          <output id="reading-feedback" class="feedback" aria-live="polite">
+            Odczytaj współrzędne punktów i wpisz je w polach.
+          </output>
+        </article>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    ></script>
+    <script src="./math.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

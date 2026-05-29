@@ -1,0 +1,320 @@
+const SHEET_NAMES = {
+  assignments: "assignments",
+  classes: "classes",
+  students: "students",
+  attempts: "attempts",
+};
+
+function doGet(event) {
+  try {
+    return createJsonResponse(handleGetRequest(event.parameter));
+  } catch (error) {
+    return createJsonResponse({
+      ok: false,
+      error: error.message,
+    });
+  }
+}
+
+function doPost(event) {
+  try {
+    const payload = JSON.parse(event.postData.contents || "{}");
+    return createJsonResponse(handlePostRequest(payload));
+  } catch (error) {
+    return createJsonResponse({
+      ok: false,
+      error: error.message,
+    });
+  }
+}
+
+function handleGetRequest(parameters) {
+  const action = parameters.action;
+
+  if (action === "getAssignment") {
+    return getAssignmentResponse(parameters.assignmentId);
+  }
+
+  if (action === "getClasses") {
+    return getClassesResponse();
+  }
+
+  throw new Error("Nieobsługiwana akcja GET.");
+}
+
+function handlePostRequest(payload) {
+  const action = payload.action;
+
+  if (action === "createAssignment") {
+    return createAssignment(payload);
+  }
+
+  if (action === "startAssignment") {
+    return startAssignment(payload);
+  }
+
+  if (action === "submitAssignmentAttempt") {
+    return submitAssignmentAttempt(payload);
+  }
+
+  throw new Error("Nieobsługiwana akcja POST.");
+}
+
+function createAssignment(payload) {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const assignmentsSheet = getOrCreateSheet_(
+    spreadsheet,
+    SHEET_NAMES.assignments,
+    [
+      "assignmentId",
+      "title",
+      "tool",
+      "taskType",
+      "pointCount",
+      "requiredSuccesses",
+      "studentInstructions",
+      "classId",
+      "createdAt",
+    ],
+  );
+  const studentsSheet = getOrCreateSheet_(
+    spreadsheet,
+    SHEET_NAMES.students,
+    ["assignmentId", "studentName"],
+  );
+  const classRoster = getStudentsForClass_(spreadsheet, payload.classId);
+
+  const assignmentId = Utilities.getUuid();
+  const settings = payload.settings || {};
+
+  if (!payload.classId) {
+    throw new Error("Brak klasy dla zadania.");
+  }
+
+  if (!classRoster.length) {
+    throw new Error("Wybrana klasa nie ma uczniów w arkuszu classes.");
+  }
+
+  assignmentsSheet.appendRow([
+    assignmentId,
+    payload.title || "Oś liczbowa",
+    payload.tool || "number-line",
+    settings.taskType || "integer",
+    Number(settings.pointCount || 3),
+    Number(settings.requiredSuccesses || 3),
+    settings.studentInstructions || "",
+    payload.classId,
+    new Date().toISOString(),
+  ]);
+
+  classRoster.forEach(function appendStudent(name) {
+    studentsSheet.appendRow([assignmentId, name]);
+  });
+
+  return {
+    ok: true,
+    assignment: {
+      id: assignmentId,
+    },
+  };
+}
+
+function getAssignmentResponse(assignmentId) {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const assignmentsSheet = getOrCreateSheet_(
+    spreadsheet,
+    SHEET_NAMES.assignments,
+    [
+      "assignmentId",
+      "title",
+      "tool",
+      "taskType",
+      "pointCount",
+      "requiredSuccesses",
+      "studentInstructions",
+      "classId",
+      "createdAt",
+    ],
+  );
+  const studentsSheet = getOrCreateSheet_(
+    spreadsheet,
+    SHEET_NAMES.students,
+    ["assignmentId", "studentName"],
+  );
+
+  const assignmentRow = findRowByValue_(assignmentsSheet, 1, assignmentId);
+
+  if (!assignmentRow) {
+    throw new Error("Nie znaleziono zadania.");
+  }
+
+  const students = studentsSheet
+    .getDataRange()
+    .getValues()
+    .slice(1)
+    .filter(function filterStudent(row) {
+      return row[0] === assignmentId;
+    })
+    .map(function mapStudent(row) {
+      return row[1];
+    });
+
+  return {
+    ok: true,
+    assignment: {
+      id: assignmentRow[0],
+      title: assignmentRow[1],
+      tool: assignmentRow[2],
+      settings: {
+        taskType: assignmentRow[3],
+        pointCount: Number(assignmentRow[4]),
+        requiredSuccesses: Number(assignmentRow[5]),
+        studentInstructions: assignmentRow[6] || "",
+        classId: assignmentRow[7] || "",
+      },
+    },
+    students: students,
+  };
+}
+
+function getClassesResponse() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const classesSheet = getOrCreateSheet_(
+    spreadsheet,
+    SHEET_NAMES.classes,
+    ["classId", "studentName"],
+  );
+  const classMap = new Map();
+  const rows = classesSheet.getDataRange().getValues().slice(1);
+
+  rows.forEach(function forEachRow(row) {
+    const classId = String(row[0] || "").trim();
+    const studentName = String(row[1] || "").trim();
+
+    if (!classId || !studentName) {
+      return;
+    }
+
+    if (!classMap.has(classId)) {
+      classMap.set(classId, []);
+    }
+
+    classMap.get(classId).push(studentName);
+  });
+
+  const classes = Array.from(classMap.entries())
+    .map(function mapClass(entry) {
+      return {
+        id: entry[0],
+        name: entry[0],
+        studentCount: entry[1].length,
+      };
+    })
+    .sort(function sortClasses(left, right) {
+      return left.name.localeCompare(right.name);
+    });
+
+  return {
+    ok: true,
+    classes: classes,
+  };
+}
+
+function startAssignment(payload) {
+  return appendAttemptRow_(payload, {
+    status: "started",
+    completedRounds: Number(payload.completedRounds || 0),
+    completed: false,
+  });
+}
+
+function submitAssignmentAttempt(payload) {
+  return appendAttemptRow_(payload, {
+    status: payload.completed ? "completed" : "round_passed",
+    completedRounds: Number(payload.completedRounds || 0),
+    completed: Boolean(payload.completed),
+  });
+}
+
+function appendAttemptRow_(payload, details) {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const attemptsSheet = getOrCreateSheet_(
+    spreadsheet,
+    SHEET_NAMES.attempts,
+    [
+      "timestamp",
+      "assignmentId",
+      "studentName",
+      "status",
+      "attemptIndex",
+      "placementCorrect",
+      "readingCorrect",
+      "completedRounds",
+      "completed",
+    ],
+  );
+
+  attemptsSheet.appendRow([
+    new Date().toISOString(),
+    payload.assignmentId || "",
+    payload.studentName || "",
+    details.status,
+    Number(payload.attemptIndex || 0),
+    payload.placementCorrect ? "TRUE" : "FALSE",
+    payload.readingCorrect ? "TRUE" : "FALSE",
+    Number(details.completedRounds || 0),
+    details.completed ? "TRUE" : "FALSE",
+  ]);
+
+  return {
+    ok: true,
+  };
+}
+
+function getOrCreateSheet_(spreadsheet, name, headers) {
+  let sheet = spreadsheet.getSheetByName(name);
+
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(name);
+    sheet.appendRow(headers);
+  }
+
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(headers);
+  }
+
+  return sheet;
+}
+
+function getStudentsForClass_(spreadsheet, classId) {
+  const classesSheet = getOrCreateSheet_(
+    spreadsheet,
+    SHEET_NAMES.classes,
+    ["classId", "studentName"],
+  );
+
+  return classesSheet
+    .getDataRange()
+    .getValues()
+    .slice(1)
+    .filter(function filterClass(row) {
+      return String(row[0] || "").trim() === String(classId || "").trim();
+    })
+    .map(function mapStudent(row) {
+      return String(row[1] || "").trim();
+    })
+    .filter(Boolean);
+}
+
+function findRowByValue_(sheet, columnIndex, value) {
+  const rows = sheet.getDataRange().getValues().slice(1);
+  return rows.find(function findRow(row) {
+    return row[columnIndex - 1] === value;
+  });
+}
+
+function createJsonResponse(payload) {
+  return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(
+    ContentService.MimeType.JSON,
+  );
+}

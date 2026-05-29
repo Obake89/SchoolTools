@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SchoolTools - Matematyka 4-8</title>
+    <script src="./shared/config.js"></script>
+    <script src="./shared/theme.js"></script>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f7fb;
+        --panel: #ffffff;
+        --text: #1f2937;
+        --muted: #5b6472;
+        --accent: var(--app-accent, #2563eb);
+        --accent-soft: var(--app-accent-soft, #dbeafe);
+        --border: #d7deea;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--app-page-background, var(--bg));
+        color: var(--text);
+      }
+
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      header {
+        margin-bottom: 28px;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 2.4rem;
+      }
+
+      p {
+        margin: 0;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      .tool-list {
+        display: grid;
+        gap: 20px;
+      }
+
+      .tool-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 24px;
+      }
+
+      .tool-card h2 {
+        margin: 0 0 8px;
+        font-size: 1.4rem;
+      }
+
+      .tool-card a {
+        display: inline-block;
+        margin-top: 16px;
+        padding: 12px 18px;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #ffffff;
+        text-decoration: none;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1 data-brand-name>SchoolTools</h1>
+        <p>Proste, interaktywne narzędzia matematyczne dla uczniów klas 4-8.</p>
+      </header>
+
+      <section class="tool-list" aria-label="Dostępne narzędzia">
+        <article class="tool-card">
+          <h2>Oś liczbowa</h2>
+          <p>
+            Ćwiczenie zaznaczania liczb na osi oraz odczytywania współrzędnych
+            punktów.
+          </p>
+          <a href="./tools/number-line/index.html">Otwórz narzędzie</a>
+        </article>
+        <article class="tool-card">
+          <h2>Panel nauczyciela</h2>
+          <p>
+            Utwórz link do zadania dla uczniów i połącz ćwiczenie z Google
+            Sheets.
+          </p>
+          <a href="./teacher/index.html">Otwórz panel</a>
+        </article>
+      </section>
+    </main>
+    <script>
+      const brandName = window.APP_CONFIG?.brandName ?? "SchoolTools";
+      document.querySelectorAll("[data-brand-name]").forEach((element) => {
+        element.textContent = brandName;
+      });
+      document.title = `${brandName} - Matematyka 4-8`;
+    </script>
+  </body>
+</html>

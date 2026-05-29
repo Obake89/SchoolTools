@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel nauczyciela - SchoolTools</title>
+    <script src="../shared/config.js"></script>
+    <script src="../shared/theme.js"></script>
+    <script src="../shared/assignment-api.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="page__header">
+        <div>
+          <p class="page__eyebrow" data-brand-name>SchoolTools</p>
+          <h1>Panel nauczyciela</h1>
+          <p class="page__lead">
+            Ustaw zadanie dla klasy, wygeneruj link dla uczniów i zapisz wyniki
+            w Google Sheets.
+          </p>
+        </div>
+        <a class="page__back" href="../index.html">Powrót do narzędzi</a>
+      </header>
+
+      <section class="layout">
+        <section class="panel">
+          <header class="panel__header">
+            <div>
+              <h2>Nowe zadanie</h2>
+              <p>Skonfiguruj ćwiczenie osi liczbowej dla uczniów.</p>
+            </div>
+          </header>
+
+          <form id="assignment-form" class="form">
+            <div id="api-warning" class="inline-warning" hidden></div>
+
+            <div class="grid grid--2">
+              <label class="field">
+                <span>Klasa</span>
+                <select id="class-select" name="classId">
+                  <option value="">Wczytywanie klas...</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Typ liczb</span>
+                <select id="task-type-select" name="taskType">
+                  <option value="natural">Liczby naturalne</option>
+                  <option value="integer" selected>Liczby całkowite</option>
+                  <option value="commonFraction">Ułamki zwykłe</option>
+                  <option value="decimal">Ułamki dziesiętne</option>
+                  <option value="rational">Liczby wymierne</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="grid grid--2">
+              <label class="field">
+                <span>Ilość punktów</span>
+                <select id="point-count-select" name="pointCount">
+                  <option value="2">2</option>
+                  <option value="3" selected>3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Ilość poprawnych rund</span>
+                <input
+                  id="required-successes-input"
+                  name="requiredSuccesses"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value="3"
+                />
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Tytuł zadania</span>
+              <input
+                id="assignment-title-input"
+                name="title"
+                type="text"
+                value="Oś liczbowa - trening"
+              />
+            </label>
+
+            <label class="field">
+              <span>Opis dla ucznia</span>
+              <textarea
+                id="student-instructions-input"
+                name="studentInstructions"
+                rows="4"
+                placeholder="Na przykład: Zaliczenie wymaga trzech pełnych rund bez pominięcia ćwiczeń."
+              ></textarea>
+            </label>
+
+            <div class="actions">
+              <button id="create-assignment-button" type="submit">
+                Utwórz link zadania
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <aside class="panel panel--result">
+          <header class="panel__header">
+            <div>
+              <h2>Link dla uczniów</h2>
+              <p>Po utworzeniu zadania pojawi się tutaj gotowy link.</p>
+            </div>
+          </header>
+
+          <section id="result-card" class="result-card" hidden>
+            <label class="field">
+              <span>Link</span>
+              <textarea id="assignment-link-output" rows="4" readonly></textarea>
+            </label>
+            <div class="actions">
+              <button id="copy-link-button" type="button">Kopiuj link</button>
+            </div>
+          </section>
+
+          <output id="teacher-feedback" class="feedback" aria-live="polite">
+            Wypełnij dane zadania i utwórz pierwszy link dla klasy.
+          </output>
+
+          <section class="info-card">
+            <h3>Co zapisuje się do arkusza</h3>
+            <ul>
+              <li>konfiguracja zadania</li>
+              <li>klasa i lista uczniów z arkusza klas</li>
+              <li>rozpoczęcie pracy przez ucznia</li>
+              <li>zaliczone rundy i ukończenie całego zadania</li>
+            </ul>
+          </section>
+        </aside>
+      </section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>
