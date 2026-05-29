@@ -69,11 +69,9 @@ function createAssignment(payload) {
       "assignmentId",
       "title",
       "tool",
-      "taskType",
-      "pointCount",
-      "requiredSuccesses",
-      "studentInstructions",
       "classId",
+      "settingsJson",
+      "assignmentLink",
       "createdAt",
     ],
   );
@@ -95,15 +93,20 @@ function createAssignment(payload) {
     throw new Error("Wybrana klasa nie ma uczniów w arkuszu classes.");
   }
 
+  const settingsJson = JSON.stringify(settings);
+  const assignmentLink = buildAssignmentLink_(
+    payload.studentBaseUrl,
+    assignmentId,
+    payload.apiUrl,
+  );
+
   assignmentsSheet.appendRow([
     assignmentId,
     payload.title || "Oś liczbowa",
     payload.tool || "number-line",
-    settings.taskType || "integer",
-    Number(settings.pointCount || 3),
-    Number(settings.requiredSuccesses || 3),
-    settings.studentInstructions || "",
     payload.classId,
+    settingsJson,
+    assignmentLink,
     new Date().toISOString(),
   ]);
 
@@ -115,6 +118,7 @@ function createAssignment(payload) {
     ok: true,
     assignment: {
       id: assignmentId,
+      link: assignmentLink,
     },
   };
 }
@@ -128,11 +132,9 @@ function getAssignmentResponse(assignmentId) {
       "assignmentId",
       "title",
       "tool",
-      "taskType",
-      "pointCount",
-      "requiredSuccesses",
-      "studentInstructions",
       "classId",
+      "settingsJson",
+      "assignmentLink",
       "createdAt",
     ],
   );
@@ -159,19 +161,16 @@ function getAssignmentResponse(assignmentId) {
       return row[1];
     });
 
+  const assignmentData = normalizeAssignmentRow_(assignmentRow);
+
   return {
     ok: true,
     assignment: {
-      id: assignmentRow[0],
-      title: assignmentRow[1],
-      tool: assignmentRow[2],
-      settings: {
-        taskType: assignmentRow[3],
-        pointCount: Number(assignmentRow[4]),
-        requiredSuccesses: Number(assignmentRow[5]),
-        studentInstructions: assignmentRow[6] || "",
-        classId: assignmentRow[7] || "",
-      },
+      id: assignmentData.id,
+      title: assignmentData.title,
+      tool: assignmentData.tool,
+      settings: assignmentData.settings,
+      link: assignmentData.link,
     },
     students: students,
   };
@@ -221,16 +220,20 @@ function getClassesResponse() {
 }
 
 function startAssignment(payload) {
-  return appendAttemptRow_(payload, {
-    status: "started",
-    completedRounds: Number(payload.completedRounds || 0),
-    completed: false,
-  });
+  return {
+    ok: true,
+  };
 }
 
 function submitAssignmentAttempt(payload) {
+  if (!payload.completed) {
+    return {
+      ok: true,
+    };
+  }
+
   return appendAttemptRow_(payload, {
-    status: payload.completed ? "completed" : "round_passed",
+    status: "completed",
     completedRounds: Number(payload.completedRounds || 0),
     completed: Boolean(payload.completed),
   });
@@ -238,12 +241,15 @@ function submitAssignmentAttempt(payload) {
 
 function appendAttemptRow_(payload, details) {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const assignmentInfo = getAssignmentById_(spreadsheet, payload.assignmentId);
   const attemptsSheet = getOrCreateSheet_(
     spreadsheet,
     SHEET_NAMES.attempts,
     [
       "timestamp",
       "assignmentId",
+      "tool",
+      "classId",
       "studentName",
       "status",
       "attemptIndex",
@@ -257,6 +263,8 @@ function appendAttemptRow_(payload, details) {
   attemptsSheet.appendRow([
     new Date().toISOString(),
     payload.assignmentId || "",
+    assignmentInfo ? assignmentInfo.tool : "",
+    assignmentInfo ? assignmentInfo.classId : "",
     payload.studentName || "",
     details.status,
     Number(payload.attemptIndex || 0),
@@ -304,6 +312,84 @@ function getStudentsForClass_(spreadsheet, classId) {
       return String(row[1] || "").trim();
     })
     .filter(Boolean);
+}
+
+function normalizeAssignmentRow_(row) {
+  const maybeSettingsJson = row[4];
+
+  if (
+    typeof maybeSettingsJson === "string" &&
+    maybeSettingsJson.trim().startsWith("{")
+  ) {
+    return {
+      id: row[0],
+      title: row[1],
+      tool: row[2],
+      settings: JSON.parse(maybeSettingsJson),
+      link: row[5] || "",
+      classId: row[3] || "",
+    };
+  }
+
+  return {
+    id: row[0],
+    title: row[1],
+    tool: row[2],
+    settings: {
+      taskType: row[3],
+      pointCount: Number(row[4]),
+      requiredSuccesses: Number(row[5]),
+      studentInstructions: row[6] || "",
+      classId: row[7] || "",
+    },
+    link: row[8] || "",
+  };
+}
+
+function getAssignmentById_(spreadsheet, assignmentId) {
+  if (!assignmentId) {
+    return null;
+  }
+
+  const assignmentsSheet = getOrCreateSheet_(
+    spreadsheet,
+    SHEET_NAMES.assignments,
+    [
+      "assignmentId",
+      "title",
+      "tool",
+      "classId",
+      "settingsJson",
+      "assignmentLink",
+      "createdAt",
+    ],
+  );
+  const row = findRowByValue_(assignmentsSheet, 1, assignmentId);
+
+  if (!row) {
+    return null;
+  }
+
+  const normalized = normalizeAssignmentRow_(row);
+
+  return {
+    tool: normalized.tool || "",
+    classId: normalized.settings.classId || normalized.classId || "",
+  };
+}
+
+function buildAssignmentLink_(studentBaseUrl, assignmentId, apiUrl) {
+  if (!studentBaseUrl) {
+    return "";
+  }
+
+  return (
+    studentBaseUrl +
+    "?assignment=" +
+    encodeURIComponent(assignmentId) +
+    "&api=" +
+    encodeURIComponent(apiUrl || "")
+  );
 }
 
 function findRowByValue_(sheet, columnIndex, value) {

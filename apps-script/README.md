@@ -29,6 +29,16 @@ Po wdrożeniu skopiuj adres `.../exec` i wklej go w panelu nauczyciela.
 - `students`
 - `attempts`
 
+W nowej wersji zakładka `assignments` zapisuje:
+
+- identyfikator zadania,
+- nazwę,
+- narzędzie,
+- klasę,
+- `settingsJson`,
+- gotowy link dla ucznia,
+- datę utworzenia.
+
 ## Jak przygotować klasy
 
 W zakładce `classes` wpisz dane w układzie:
@@ -50,8 +60,7 @@ Panel nauczyciela pokaże dostępne klasy na podstawie tej zakładki.
 - tworzenie zadania dla wybranej klasy,
 - listę uczniów przypisaną do zadania na podstawie klasy,
 - pobieranie konfiguracji przez link ucznia,
-- zapis rozpoczęcia zadania,
-- zapis zaliczonej rundy i ukończenia całości.
+- zapis tylko ukończonych zadań w `attempts`.
 
 ## Co można rozwinąć później
 

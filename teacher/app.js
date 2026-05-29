@@ -38,10 +38,14 @@ function getStudentToolBaseUrl() {
 }
 
 function collectTeacherFormPayload(formData) {
+  const apiUrl = getDefaultApiUrl();
+
   return {
     title: String(formData.get("title") ?? "").trim(),
     tool: "number-line",
     classId: String(formData.get("classId") ?? "").trim(),
+    apiUrl,
+    studentBaseUrl: getStudentToolBaseUrl(),
     settings: {
       taskType: String(formData.get("taskType") ?? "integer"),
       pointCount: Number(formData.get("pointCount") ?? 3),
@@ -93,7 +97,8 @@ async function handleTeacherSubmit(event) {
       api.apiUrl,
     );
 
-    teacherElements.assignmentLinkOutput.value = assignmentLink;
+    teacherElements.assignmentLinkOutput.value =
+      response.assignment.link || assignmentLink;
     teacherElements.resultCard.hidden = false;
 
     renderTeacherFeedback(

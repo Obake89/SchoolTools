@@ -31,6 +31,8 @@ const state = {
 };
 
 const elements = {
+  pageHeader: document.querySelector("#page-header"),
+  exerciseGrid: document.querySelector("#exercise-grid"),
   toolbar: document.querySelector("#toolbar"),
   pointCountSelect: document.querySelector("#point-count-select"),
   taskTypeSelect: document.querySelector("#task-type-select"),
@@ -399,6 +401,10 @@ async function submitAssignmentRoundProgress() {
   const requiredSuccesses = state.assignmentConfig.settings.requiredSuccesses;
   const completed = state.completedRounds >= requiredSuccesses;
 
+  if (!completed) {
+    return;
+  }
+
   await state.assignmentApi.submitAssignmentAttempt({
     assignmentId: state.assignmentId,
     studentName: state.currentStudent,
@@ -442,6 +448,7 @@ async function handleAssignmentRoundCompleted() {
     );
     elements.placementCheckButton.disabled = true;
     elements.readingCheckButton.disabled = true;
+    elements.exerciseGrid.hidden = true;
     return;
   }
 
@@ -598,6 +605,7 @@ async function startAssignmentForSelectedStudent() {
 
     elements.studentSetup.hidden = true;
     setExerciseControlsEnabled(true);
+    elements.exerciseGrid.hidden = false;
     renderAssignmentFeedback(
       `Powodzenia, ${state.currentStudent}. Możesz zaczynać pierwszą rundę.`,
       "default",
@@ -624,6 +632,8 @@ async function initializeAssignmentMode() {
   state.assignmentId = assignmentId;
   elements.assignmentPanel.hidden = false;
   elements.toolbar.hidden = true;
+  elements.pageHeader.hidden = true;
+  elements.exerciseGrid.hidden = true;
   setExerciseControlsEnabled(false);
   renderAssignmentFeedback("Trwa wczytywanie zadania...");
 
@@ -673,6 +683,7 @@ async function initializeApp() {
 
   if (!startedAssignmentMode) {
     setExerciseControlsEnabled(true);
+    elements.exerciseGrid.hidden = false;
     renderAllTasks();
   }
 }

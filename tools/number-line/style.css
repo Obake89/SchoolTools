@@ -148,6 +148,12 @@ select {
   flex: 1 1 280px;
 }
 
+.student-setup[hidden],
+.exercise-grid[hidden],
+.page__header[hidden] {
+  display: none;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
