@@ -1,6 +1,6 @@
 window.APP_CONFIG = {
   brandName: "PirxTools",
-  assignmentsApiUrl: "https://script.google.com/macros/s/AKfycbxHaL4-l5hidiS2y9hSzAzrXA2uunwKyuiWYFN3Q9fmwCpVsxLQ1DbtJm7XSANg5HU/exec",
+  assignmentsApiUrl: "https://script.google.com/macros/s/AKfycby615j28Z-0Ej7frXDTmpJd03NrHWXkKphiP2hw7ABCKjBr0PBfjF7emH7WlX1CXro/exec",
   theme: {
     accentColor: "#2563eb",
     accentStrongColor: "#1d4ed8",
