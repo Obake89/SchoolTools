@@ -85,6 +85,22 @@ function renderKatex(element, latex, fallbackText = "") {
   element.textContent = fallbackText || latex;
 }
 
+function renderTileLabel(element, tile, options = {}) {
+  if (!element) {
+    return;
+  }
+
+  const prefixLatex = options.prefixLatex || "";
+  const prefixText = options.prefixText || "";
+
+  if (tile.latex) {
+    renderKatex(element, `${prefixLatex}${tile.latex}`, `${prefixText}${tile.label}`);
+    return;
+  }
+
+  element.textContent = `${prefixText}${tile.label}`;
+}
+
 function renderFeedback(element, message, status = "default") {
   element.textContent = message;
 
@@ -257,7 +273,7 @@ function createTileButton(tile) {
   button.addEventListener("click", () => handleTilePick(tile.id));
 
   const label = document.createElement("span");
-  label.textContent = tile.label;
+  renderTileLabel(label, tile);
 
   button.append(label);
   return button;
@@ -276,7 +292,10 @@ function createPlacedTile(tileId, side, index) {
   wrapper.className = "build-tile";
 
   const label = document.createElement("span");
-  label.textContent = `${index + 1}. ${tile.label}`;
+  renderTileLabel(label, tile, {
+    prefixLatex: `\\text{${index + 1}. }`,
+    prefixText: `${index + 1}. `,
+  });
 
   const removeButton = document.createElement("button");
   removeButton.type = "button";

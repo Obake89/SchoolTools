@@ -358,25 +358,33 @@
     const groupedRequiredTiles = new Map();
 
     requiredTiles.forEach((tile) => {
-      if (!groupedRequiredTiles.has(tile.label)) {
-        groupedRequiredTiles.set(tile.label, []);
+      const tileKey = createExpressionKey(tile.expression);
+
+      if (!groupedRequiredTiles.has(tileKey)) {
+        groupedRequiredTiles.set(tileKey, []);
       }
 
-      groupedRequiredTiles.get(tile.label).push(tile);
+      groupedRequiredTiles.get(tileKey).push(tile);
     });
 
     const poolTiles = [];
-    const customLabels = parseCustomTilePoolLabels(customTilePoolText);
+    const customSpecs = parseCustomTilePoolSpecs(customTilePoolText);
 
-    customLabels.forEach((label, index) => {
-      const matchingRequiredTiles = groupedRequiredTiles.get(label);
+    customSpecs.forEach((spec, index) => {
+      const specKey = createExpressionKey(spec.expression);
+      const matchingRequiredTiles = groupedRequiredTiles.get(specKey);
 
       if (matchingRequiredTiles && matchingRequiredTiles.length > 0) {
-        poolTiles.push(matchingRequiredTiles.shift());
+        const requiredTile = matchingRequiredTiles.shift();
+        poolTiles.push({
+          ...requiredTile,
+          label: spec.displayText,
+          latex: spec.displayLatex,
+        });
         return;
       }
 
-      poolTiles.push(createExtraTileFromLabel(label, index));
+      poolTiles.push(createExtraTileFromSpec(spec, index));
     });
 
     groupedRequiredTiles.forEach((remainingTiles) => {
@@ -388,24 +396,38 @@
     return poolTiles;
   }
 
-  function parseCustomTilePoolLabels(value) {
+  function parseCustomTilePoolSpecs(value) {
     return String(value || "")
       .split(/[|;\n]+/)
       .map((item) => item.trim())
-      .filter(Boolean);
+      .filter(Boolean)
+      .map(parseCustomTileSpec);
   }
 
-  function createExtraTileFromLabel(label, index) {
-    const parsedExpression = parseLinearExpression(label);
+  function parseCustomTileSpec(value) {
+    const separator = value.includes("=>") ? "=>" : value.includes("::") ? "::" : "";
+    const parts = separator ? value.split(separator) : [value];
+    const displayText = String(parts[0] || "").trim();
+    const expressionText = String(parts[1] || parts[0] || "").trim();
+    const parsedExpression = parseLinearExpression(expressionText);
 
     return {
-      id: `extra-custom-${index}-${sanitizeIdPart(label) || "zero"}`,
+      displayText,
+      displayLatex: separator ? displayText : formatExpressionAsLatex(parsedExpression),
+      expressionText,
+      expression: parsedExpression,
+    };
+  }
+
+  function createExtraTileFromSpec(spec, index) {
+    return {
+      id: `extra-custom-${index}-${sanitizeIdPart(spec.displayText) || "zero"}`,
       side: "extra",
       order: index,
       required: false,
-      label,
-      latex: formatExpressionAsLatex(parsedExpression),
-      expression: parsedExpression,
+      label: spec.displayText,
+      latex: spec.displayLatex,
+      expression: spec.expression,
     };
   }
 
@@ -1396,6 +1418,15 @@
 
   function areStringListsEqualAsSets(left, right) {
     return areStringListsEqual([...left].sort(), [...right].sort());
+  }
+
+  function createExpressionKey(expression) {
+    return [
+      expression.x.numerator,
+      expression.x.denominator,
+      expression.constant.numerator,
+      expression.constant.denominator,
+    ].join(":");
   }
 
   function sanitizeIdPart(value) {

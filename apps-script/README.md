@@ -84,7 +84,10 @@ Ważne:
 - `sourceEquationLatex` wpisujesz jako LaTeX lub prosty zapis matematyczny do wyświetlenia uczniowi,
 - `simplifiedLeft` i `simplifiedRight` wpisujesz jako zwykły zapis tekstowy, na przykład `2x+8`, `-3x+5`, `3/2x-4`,
 - `tilePool` jest opcjonalne i zawiera własną listę rozsypanych jednomianów oddzielonych `;`, `|` albo nową linią,
+- w `tilePool` możesz używać zapisu `to-co-ma-być-widoczne=>wyrażenie`, jeśli chcesz pokazać klocek w LaTeX-u, ale jego wartość podać zwykłym tekstem, na przykład `\frac{3}{2}x=>3/2x` albo `-\frac{5}{2}=>-5/2`,
 - jeśli w `tilePool` pominiesz któryś potrzebny jednomian, narzędzie i tak go dopisze, żeby zadanie dało się rozwiązać.
+
+Nie ma sztywnego limitu liczby pozycji w `tilePool`, ale w praktyce warto trzymać się raczej krótszej rozsypanki, żeby zadanie było czytelne na telefonie i tablecie.
 
 ## Co można rozwinąć później
 
