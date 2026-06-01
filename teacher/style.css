@@ -113,6 +113,11 @@ textarea {
   gap: 16px;
 }
 
+.tool-settings {
+  display: grid;
+  gap: 16px;
+}
+
 .grid {
   display: grid;
   gap: 16px;

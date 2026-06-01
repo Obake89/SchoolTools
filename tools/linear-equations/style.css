@@ -1,0 +1,495 @@
+:root {
+  color-scheme: light;
+  --bg: #eef4ff;
+  --panel: #ffffff;
+  --panel-soft: #f8fbff;
+  --panel-strong: #eff6ff;
+  --text: #1f2937;
+  --muted: #566274;
+  --border: #d8e1ef;
+  --accent: var(--app-accent, #2563eb);
+  --accent-strong: var(--app-accent-strong, #1d4ed8);
+  --accent-soft: var(--app-accent-soft, #dbeafe);
+  --success: #166534;
+  --success-soft: #dcfce7;
+  --warning: #b45309;
+  --warning-soft: #fef3c7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: var(--text);
+  background: var(
+    --app-page-background,
+    radial-gradient(circle at top left, #ffffff 0, #eef4ff 40%, #e5eefc 100%)
+  );
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button,
+select,
+input {
+  min-height: 48px;
+  border-radius: 12px;
+}
+
+button {
+  border: 1px solid transparent;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 18px;
+}
+
+button:hover,
+button:focus-visible {
+  background: var(--accent-strong);
+}
+
+.button--secondary {
+  background: #ffffff;
+  color: var(--accent-strong);
+  border-color: var(--border);
+}
+
+.button--secondary:hover,
+.button--secondary:focus-visible {
+  background: var(--accent-soft);
+}
+
+select,
+input {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  padding: 0 14px;
+}
+
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 16px 56px;
+}
+
+.hero,
+.toolbar,
+.task-intro,
+.panel,
+.feedback,
+.formula-card,
+.history {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  padding: 26px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(239, 246, 255, 0.92)),
+    var(--panel);
+}
+
+.hero__eyebrow,
+.task-intro__eyebrow,
+.panel__step {
+  margin: 0 0 10px;
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.85rem;
+}
+
+.hero h1,
+.task-intro h2,
+.panel h2,
+.pool h3,
+.dropzone h3,
+.formula-card h3,
+.history h3 {
+  margin: 0;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.hero__lead,
+.task-intro__text,
+.panel__header p,
+.pool__header p,
+.history__header p {
+  margin: 12px 0 0;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.hero__back {
+  flex-shrink: 0;
+  align-self: center;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 18px 20px;
+}
+
+.toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  min-width: 220px;
+}
+
+.field span {
+  font-weight: 700;
+}
+
+.task-intro {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  margin-top: 20px;
+  padding: 20px 22px;
+}
+
+.task-intro__badge {
+  min-width: 140px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 6px;
+}
+
+.task-intro__badge span {
+  color: var(--muted);
+}
+
+.layout {
+  display: block;
+  margin-top: 20px;
+}
+
+.panel {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  align-items: start;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+.panel__header p {
+  max-width: 62ch;
+}
+
+.stage-grid {
+  display: grid;
+  gap: 18px;
+  align-items: start;
+}
+
+.stage-grid--build,
+.stage-grid--solve {
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.95fr);
+}
+
+.stage-grid__wide {
+  grid-column: 1 / -1;
+}
+
+.stage-grid__main,
+.stage-grid__side {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.target-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.target-switch__button {
+  background: var(--panel-soft);
+  color: var(--accent-strong);
+  border: 1px solid var(--border);
+}
+
+.target-switch__button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.equation-builder {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.dropzone,
+.pool,
+.formula-card,
+.operation-panel,
+.history {
+  padding: 18px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.dropzone__header,
+.pool__header,
+.history__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.equation-sign {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.tile-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 60px;
+}
+
+.tile-strip--build {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px dashed #bfd0ec;
+  background: #ffffff;
+}
+
+.tile-strip--build:empty::before {
+  content: "Tutaj pojawią się wybrane klocki.";
+  color: var(--muted);
+}
+
+.tile-strip--pool {
+  margin-top: 14px;
+}
+
+.tile,
+.build-tile {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 0 14px;
+  background: #ffffff;
+}
+
+.tile {
+  color: var(--accent-strong);
+}
+
+.tile:hover,
+.tile:focus-visible {
+  background: var(--accent-soft);
+}
+
+.tile[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #ffffff;
+}
+
+.build-tile {
+  color: var(--text);
+  background: #eff6ff;
+}
+
+.build-tile__remove,
+.link-button {
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.build-tile__remove:hover,
+.build-tile__remove:focus-visible,
+.link-button:hover,
+.link-button:focus-visible {
+  background: transparent;
+  color: var(--accent);
+}
+
+.panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.feedback {
+  padding: 14px 16px;
+  line-height: 1.6;
+}
+
+.feedback[data-status="success"] {
+  background: var(--success-soft);
+  border-color: #86efac;
+  color: var(--success);
+}
+
+.feedback[data-status="warning"] {
+  background: var(--warning-soft);
+  border-color: #fcd34d;
+  color: var(--warning);
+}
+
+.formula-card {
+  display: grid;
+  gap: 18px;
+}
+
+.stage-grid--solve .formula-card {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.formula-card__formula {
+  min-height: 56px;
+  margin-top: 10px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  display: grid;
+  align-items: center;
+  color: var(--accent-strong);
+  overflow-x: auto;
+}
+
+.operation-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.history {
+  background: var(--panel-soft);
+}
+
+.history__list {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history__item {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+}
+
+.history__item-title {
+  margin: 0 0 10px;
+  font-weight: 700;
+}
+
+.history__formula {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+}
+
+.history__arrow {
+  margin: 10px 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+@media (max-width: 980px) {
+  .stage-grid--build,
+  .stage-grid--solve,
+  .stage-grid--solve .formula-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero,
+  .task-intro,
+  .toolbar {
+    flex-direction: column;
+  }
+
+  .hero__back,
+  .toolbar__actions,
+  .toolbar__actions button,
+  .field,
+  button {
+    width: 100%;
+  }
+
+  .target-switch,
+  .equation-builder {
+    grid-template-columns: 1fr;
+  }
+
+  .equation-sign {
+    width: 100%;
+  }
+}

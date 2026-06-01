@@ -1,6 +1,10 @@
 const teacherElements = {
   form: document.querySelector("#assignment-form"),
+  toolSelect: document.querySelector("#tool-select"),
   classSelect: document.querySelector("#class-select"),
+  numberLineSettings: document.querySelector("#number-line-settings"),
+  linearEquationsSettings: document.querySelector("#linear-equations-settings"),
+  assignmentTitleInput: document.querySelector("#assignment-title-input"),
   apiWarning: document.querySelector("#api-warning"),
   assignmentLinkOutput: document.querySelector("#assignment-link-output"),
   resultCard: document.querySelector("#result-card"),
@@ -33,19 +37,41 @@ function getDefaultApiUrl() {
   return window.APP_CONFIG?.assignmentsApiUrl ?? "";
 }
 
-function getStudentToolBaseUrl() {
-  return new URL("../tools/number-line/index.html", window.location.href).toString();
+function getStudentToolBaseUrl(tool) {
+  const toolPath =
+    tool === "linear-equations"
+      ? "../tools/linear-equations/index.html"
+      : "../tools/number-line/index.html";
+
+  return new URL(toolPath, window.location.href).toString();
 }
 
 function collectTeacherFormPayload(formData) {
   const apiUrl = getDefaultApiUrl();
-
-  return {
+  const tool = String(formData.get("tool") ?? "number-line").trim();
+  const basePayload = {
     title: String(formData.get("title") ?? "").trim(),
-    tool: "number-line",
+    tool,
     classId: String(formData.get("classId") ?? "").trim(),
     apiUrl,
-    studentBaseUrl: getStudentToolBaseUrl(),
+    studentBaseUrl: getStudentToolBaseUrl(tool),
+  };
+
+  if (tool === "linear-equations") {
+    return {
+      ...basePayload,
+      settings: {
+        difficulty: String(formData.get("difficulty") ?? "easy").trim(),
+        taskGroup: String(formData.get("taskGroup") ?? "").trim(),
+        studentInstructions: String(
+          formData.get("studentInstructions") ?? "",
+        ).trim(),
+      },
+    };
+  }
+
+  return {
+    ...basePayload,
     settings: {
       taskType: String(formData.get("taskType") ?? "integer"),
       pointCount: Number(formData.get("pointCount") ?? 3),
@@ -57,11 +83,21 @@ function collectTeacherFormPayload(formData) {
   };
 }
 
-function buildStudentAssignmentLink(assignmentId, apiUrl) {
-  const url = new URL(getStudentToolBaseUrl());
-  url.searchParams.set("assignment", assignmentId);
-  url.searchParams.set("api", apiUrl);
+function buildStudentAssignmentLink(assignmentId, tool) {
+  const url = new URL(getStudentToolBaseUrl(tool));
+  url.searchParams.set("a", assignmentId);
   return url.toString();
+}
+
+function renderToolSettings() {
+  const selectedTool = teacherElements.toolSelect.value;
+  const isLinearEquations = selectedTool === "linear-equations";
+
+  teacherElements.numberLineSettings.hidden = isLinearEquations;
+  teacherElements.linearEquationsSettings.hidden = !isLinearEquations;
+  teacherElements.assignmentTitleInput.value = isLinearEquations
+    ? "Równania liniowe - trening"
+    : "Oś liczbowa - trening";
 }
 
 async function handleTeacherSubmit(event) {
@@ -94,7 +130,7 @@ async function handleTeacherSubmit(event) {
     const response = await api.createAssignment(payload);
     const assignmentLink = buildStudentAssignmentLink(
       response.assignment.id,
-      api.apiUrl,
+      payload.tool,
     );
 
     teacherElements.assignmentLinkOutput.value =
@@ -170,7 +206,9 @@ async function loadClasses() {
 function initializeTeacherPanel() {
   applyTeacherBrandName();
   teacherElements.form.addEventListener("submit", handleTeacherSubmit);
+  teacherElements.toolSelect.addEventListener("change", renderToolSettings);
   teacherElements.copyLinkButton.addEventListener("click", handleCopyLink);
+  renderToolSettings();
   loadClasses();
 }
 

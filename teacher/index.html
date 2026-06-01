@@ -28,7 +28,7 @@
           <header class="panel__header">
             <div>
               <h2>Nowe zadanie</h2>
-              <p>Skonfiguruj ćwiczenie osi liczbowej dla uczniów.</p>
+              <p>Skonfiguruj narzędzie i wygeneruj link dla wybranej klasy.</p>
             </div>
           </header>
 
@@ -37,12 +37,23 @@
 
             <div class="grid grid--2">
               <label class="field">
+                <span>Narzędzie</span>
+                <select id="tool-select" name="tool">
+                  <option value="number-line">Oś liczbowa</option>
+                  <option value="linear-equations">Równania liniowe</option>
+                </select>
+              </label>
+
+              <label class="field">
                 <span>Klasa</span>
                 <select id="class-select" name="classId">
                   <option value="">Wczytywanie klas...</option>
                 </select>
               </label>
+            </div>
 
+            <section id="number-line-settings" class="tool-settings">
+              <div class="grid grid--2">
               <label class="field">
                 <span>Typ liczb</span>
                 <select id="task-type-select" name="taskType">
@@ -53,9 +64,7 @@
                   <option value="rational">Liczby wymierne</option>
                 </select>
               </label>
-            </div>
 
-            <div class="grid grid--2">
               <label class="field">
                 <span>Ilość punktów</span>
                 <select id="point-count-select" name="pointCount">
@@ -79,6 +88,30 @@
                 />
               </label>
             </div>
+            </section>
+
+            <section id="linear-equations-settings" class="tool-settings" hidden>
+              <div class="grid grid--2">
+                <label class="field">
+                  <span>Poziom trudności</span>
+                  <select id="difficulty-select" name="difficulty">
+                    <option value="easy">easy</option>
+                    <option value="medium">medium</option>
+                    <option value="hard" selected>hard</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>Grupa zadań</span>
+                  <input
+                    id="task-group-input"
+                    name="taskGroup"
+                    type="text"
+                    placeholder="Na przykład: A"
+                  />
+                </label>
+              </div>
+            </section>
 
             <label class="field">
               <span>Tytuł zadania</span>

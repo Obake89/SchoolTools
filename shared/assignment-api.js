@@ -56,6 +56,13 @@ function createAssignmentApiClient(options) {
     getClasses() {
       return request("getClasses", {}, "GET");
     },
+    getLinearEquationTask(difficulty, group = "") {
+      return request(
+        "getLinearEquationTask",
+        { difficulty, group },
+        "GET",
+      );
+    },
     getAssignment(assignmentId) {
       return request("getAssignment", { assignmentId }, "GET");
     },

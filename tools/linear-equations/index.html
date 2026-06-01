@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Równania liniowe - SchoolTools</title>
+    <script src="../../shared/config.js?v=20260601-1"></script>
+    <script src="../../shared/theme.js?v=20260601-1"></script>
+    <script src="../../shared/assignment-api.js?v=20260601-1"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    />
+    <link rel="stylesheet" href="./style.css?v=20260601-1" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero" id="page-header">
+        <div class="hero__content">
+          <p class="hero__eyebrow" data-brand-name>SchoolTools</p>
+          <h1>Równania liniowe krok po kroku</h1>
+          <p class="hero__lead">
+            Najpierw uprość równanie do sumy algebraicznej z jednomianów, a
+            potem rozwiązuj je takimi samymi działaniami po obu stronach.
+          </p>
+        </div>
+        <a class="hero__back" href="../../index.html">Powrót do listy narzędzi</a>
+      </header>
+
+      <section class="toolbar" aria-label="Ustawienia ćwiczenia">
+        <label class="field">
+          <span>Poziom trudności</span>
+          <select id="difficulty-select">
+            <option value="easy">easy - klasa 5</option>
+            <option value="medium">medium - klasy 6-7</option>
+            <option value="hard">hard - klasy 7-8</option>
+          </select>
+        </label>
+
+        <div class="toolbar__actions">
+          <button id="new-task-button" type="button">Nowe zadanie</button>
+          <button id="reset-build-button" type="button" class="button button--secondary">
+            Wyczyść układanie
+          </button>
+        </div>
+      </section>
+
+      <section class="task-intro" aria-label="Opis zadania">
+        <div>
+          <p class="task-intro__eyebrow">Cel ćwiczenia</p>
+          <h2 id="task-title">Rozwiąż równanie liniowe</h2>
+          <p id="task-description" class="task-intro__text"></p>
+        </div>
+        <div class="task-intro__badge">
+          <span>Poziom</span>
+          <strong id="difficulty-badge">easy</strong>
+        </div>
+      </section>
+
+      <section class="layout" aria-label="Etapy zadania">
+        <article id="stage-one-panel" class="panel">
+          <header class="panel__header">
+            <p class="panel__step">Etap 1</p>
+            <h2>Ułóż uproszczoną postać równania</h2>
+            <p>
+              Spójrz na równanie startowe i z jednomianów ułóż jego prostszą
+              postać po lewej i po prawej stronie.
+            </p>
+          </header>
+
+          <div class="stage-grid stage-grid--build">
+            <section class="formula-card stage-grid__wide">
+              <div>
+                <h3>Równanie startowe</h3>
+                <div id="source-equation" class="formula-card__formula"></div>
+              </div>
+            </section>
+
+            <div class="stage-grid__main">
+              <div class="target-switch" role="tablist" aria-label="Wybór strony równania">
+                <button
+                  id="target-left-button"
+                  type="button"
+                  class="target-switch__button"
+                  aria-pressed="true"
+                >
+                  Dodawaj do lewej strony
+                </button>
+                <button
+                  id="target-right-button"
+                  type="button"
+                  class="target-switch__button"
+                  aria-pressed="false"
+                >
+                  Dodawaj do prawej strony
+                </button>
+              </div>
+
+              <div class="equation-builder">
+                <section class="dropzone" aria-label="Lewa strona równania">
+                  <div class="dropzone__header">
+                    <h3>Lewa strona</h3>
+                    <button id="clear-left-button" type="button" class="link-button">
+                      Wyczyść
+                    </button>
+                  </div>
+                  <div id="left-build-list" class="tile-strip tile-strip--build"></div>
+                </section>
+
+                <div class="equation-sign" aria-hidden="true">=</div>
+
+                <section class="dropzone" aria-label="Prawa strona równania">
+                  <div class="dropzone__header">
+                    <h3>Prawa strona</h3>
+                    <button id="clear-right-button" type="button" class="link-button">
+                      Wyczyść
+                    </button>
+                  </div>
+                  <div id="right-build-list" class="tile-strip tile-strip--build"></div>
+                </section>
+              </div>
+
+              <div class="panel__actions">
+                <button id="check-build-button" type="button">Sprawdź uproszczenie</button>
+              </div>
+
+              <output id="build-feedback" class="feedback" aria-live="polite">
+                Najpierw uprość obie strony równania z pomocą jednomianów.
+              </output>
+            </div>
+
+            <section class="pool stage-grid__side" aria-label="Pula klocków">
+              <div class="pool__header">
+                <h3>Rozsypane jednomiany</h3>
+                <p>Kliknij jednomian, aby dodać go do aktywnej strony uproszczonego równania.</p>
+              </div>
+              <div id="tile-pool" class="tile-strip tile-strip--pool"></div>
+            </section>
+          </div>
+        </article>
+
+        <article id="stage-two-panel" class="panel" hidden>
+          <header class="panel__header">
+            <p class="panel__step">Etap 2</p>
+            <h2>Wykonuj operacje po obu stronach</h2>
+            <p>
+              Gdy uprościsz równanie poprawnie, wpisuj kolejne działania i
+              obserwuj wynik po każdym kroku.
+            </p>
+          </header>
+
+          <div class="stage-grid stage-grid--solve">
+            <section class="formula-card stage-grid__wide">
+              <div>
+                <h3>Równanie startowe</h3>
+                <div id="original-equation" class="formula-card__formula"></div>
+              </div>
+              <div>
+                <h3>Aktualne równanie do rozwiązania</h3>
+                <div id="current-equation" class="formula-card__formula"></div>
+              </div>
+            </section>
+
+            <div class="stage-grid__main">
+              <section class="operation-panel" id="operation-panel" aria-label="Operacja na obu stronach">
+                <label class="field">
+                  <span>Operacja</span>
+                  <select id="operation-select">
+                    <option value="add">Dodaj</option>
+                    <option value="subtract">Odejmij</option>
+                    <option value="multiply">Pomnóż przez</option>
+                    <option value="divide">Podziel przez</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>Jednomian lub liczba</span>
+                  <input
+                    id="monomial-input"
+                    type="text"
+                    inputmode="text"
+                    autocomplete="off"
+                    spellcheck="false"
+                    placeholder="np. 3, -2, x, -x, 3/2"
+                  />
+                </label>
+
+                <div class="panel__actions">
+                  <button id="apply-operation-button" type="button">
+                    Wykonaj operację
+                  </button>
+                  <button id="undo-step-button" type="button" class="button button--secondary">
+                    Cofnij krok
+                  </button>
+                </div>
+              </section>
+
+              <output id="operation-feedback" class="feedback" aria-live="polite">
+                Po poprawnym uproszczeniu równania tutaj pojawią się kolejne kroki.
+              </output>
+            </div>
+
+            <section class="history stage-grid__side" aria-label="Historia kroków">
+              <div class="history__header">
+                <h3>Historia przekształceń</h3>
+                <p>Każdy krok pokazuje równanie przed i po wykonaniu operacji.</p>
+              </div>
+              <ol id="history-list" class="history__list"></ol>
+            </section>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    ></script>
+    <script src="./math.js?v=20260601-1"></script>
+    <script src="./app.js?v=20260601-1"></script>
+  </body>
+</html>

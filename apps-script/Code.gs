@@ -3,6 +3,7 @@ const SHEET_NAMES = {
   classes: "classes",
   students: "students",
   attempts: "attempts",
+  linearEquationTasks: "linear-equations-tasks",
 };
 
 function doGet(event) {
@@ -37,6 +38,10 @@ function handleGetRequest(parameters) {
 
   if (action === "getClasses") {
     return getClassesResponse();
+  }
+
+  if (action === "getLinearEquationTask") {
+    return getLinearEquationTaskResponse(parameters.difficulty, parameters.group);
   }
 
   throw new Error("Nieobsługiwana akcja GET.");
@@ -219,6 +224,62 @@ function getClassesResponse() {
   };
 }
 
+function getLinearEquationTaskResponse(difficulty, group) {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const tasksSheet = getOrCreateSheet_(
+    spreadsheet,
+    SHEET_NAMES.linearEquationTasks,
+    [
+      "taskId",
+      "difficulty",
+      "group",
+      "title",
+      "sourceEquationLatex",
+      "simplifiedLeft",
+      "simplifiedRight",
+      "tilePool",
+      "instructions",
+    ],
+  );
+
+  const rows = tasksSheet.getDataRange().getValues().slice(1);
+  const normalizedDifficulty = String(difficulty || "").trim().toLowerCase();
+  const normalizedGroup = String(group || "").trim().toLowerCase();
+
+  const filteredRows = rows.filter(function filterRow(row) {
+    const rowDifficulty = String(row[1] || "").trim().toLowerCase();
+    const rowGroup = String(row[2] || "").trim().toLowerCase();
+
+    if (!rowDifficulty || !row[4] || !row[5] || !row[6]) {
+      return false;
+    }
+
+    if (normalizedDifficulty && rowDifficulty !== normalizedDifficulty) {
+      return false;
+    }
+
+    if (normalizedGroup && rowGroup !== normalizedGroup) {
+      return false;
+    }
+
+    return true;
+  });
+
+  if (!filteredRows.length) {
+    throw new Error(
+      "Nie znaleziono zadań w zakładce linear-equations-tasks dla wybranego poziomu.",
+    );
+  }
+
+  const randomRow =
+    filteredRows[Math.floor(Math.random() * filteredRows.length)];
+
+  return {
+    ok: true,
+    task: normalizeLinearEquationTaskRow_(randomRow),
+  };
+}
+
 function startAssignment(payload) {
   return {
     ok: true,
@@ -385,10 +446,8 @@ function buildAssignmentLink_(studentBaseUrl, assignmentId, apiUrl) {
 
   return (
     studentBaseUrl +
-    "?assignment=" +
-    encodeURIComponent(assignmentId) +
-    "&api=" +
-    encodeURIComponent(apiUrl || "")
+    "?a=" +
+    encodeURIComponent(assignmentId)
   );
 }
 
@@ -397,6 +456,20 @@ function findRowByValue_(sheet, columnIndex, value) {
   return rows.find(function findRow(row) {
     return row[columnIndex - 1] === value;
   });
+}
+
+function normalizeLinearEquationTaskRow_(row) {
+  return {
+    taskId: String(row[0] || "").trim(),
+    difficulty: String(row[1] || "").trim().toLowerCase(),
+    group: String(row[2] || "").trim(),
+    title: String(row[3] || "").trim(),
+    sourceEquationLatex: String(row[4] || "").trim(),
+    simplifiedLeft: String(row[5] || "").trim(),
+    simplifiedRight: String(row[6] || "").trim(),
+    tilePool: String(row[7] || "").trim(),
+    instructions: String(row[8] || "").trim(),
+  };
 }
 
 function createJsonResponse(payload) {

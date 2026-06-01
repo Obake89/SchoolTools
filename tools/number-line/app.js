@@ -621,8 +621,8 @@ async function startAssignmentForSelectedStudent() {
 
 async function initializeAssignmentMode() {
   const params = getUrlParams();
-  const assignmentId = params.get("assignment");
-  const apiUrl = params.get("api") || window.APP_CONFIG?.assignmentsApiUrl || "";
+  const assignmentId = params.get("a") || params.get("assignment");
+  const apiUrl = window.APP_CONFIG?.assignmentsApiUrl || "";
 
   if (!assignmentId || !apiUrl) {
     return false;

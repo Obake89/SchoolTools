@@ -28,6 +28,7 @@ Po wdrożeniu skopiuj adres `.../exec` i wklej go w panelu nauczyciela.
 - `assignments`
 - `students`
 - `attempts`
+- `linear-equations-tasks`
 
 W nowej wersji zakładka `assignments` zapisuje:
 
@@ -61,6 +62,29 @@ Panel nauczyciela pokaże dostępne klasy na podstawie tej zakładki.
 - listę uczniów przypisaną do zadania na podstawie klasy,
 - pobieranie konfiguracji przez link ucznia,
 - zapis tylko ukończonych zadań w `attempts`.
+
+## Zakładka `linear-equations-tasks`
+
+W tej zakładce przygotowujesz własne równania do narzędzia równań liniowych.
+
+Układ kolumn:
+
+```text
+taskId | difficulty | group | title | sourceEquationLatex | simplifiedLeft | simplifiedRight | tilePool | instructions
+```
+
+Przykład:
+
+```text
+hard-01 | hard | A | Iloczyn sum | (x+4)(x+1)=(2x+3)(x-x+2)+5 | 2x+8 | 2x+11 | 2x;8;2x;11;x;-3;5 | Najpierw uprość obie strony, potem rozwiąż równanie.
+```
+
+Ważne:
+
+- `sourceEquationLatex` wpisujesz jako LaTeX lub prosty zapis matematyczny do wyświetlenia uczniowi,
+- `simplifiedLeft` i `simplifiedRight` wpisujesz jako zwykły zapis tekstowy, na przykład `2x+8`, `-3x+5`, `3/2x-4`,
+- `tilePool` jest opcjonalne i zawiera własną listę rozsypanych jednomianów oddzielonych `;`, `|` albo nową linią,
+- jeśli w `tilePool` pominiesz któryś potrzebny jednomian, narzędzie i tak go dopisze, żeby zadanie dało się rozwiązać.
 
 ## Co można rozwinąć później
 
