@@ -309,10 +309,11 @@ input {
 
 .tile-strip--build {
   margin-top: 16px;
-  padding: 14px;
+  padding: 14px 14px 42px;
   border-radius: 16px;
   border: 1px dashed #bfd0ec;
   background: #ffffff;
+  align-items: center;
 }
 
 .tile-strip--build:empty::before {
@@ -354,9 +355,35 @@ input {
 .build-tile {
   color: var(--text);
   background: #eff6ff;
+  position: relative;
+  padding-right: 14px;
 }
 
-.build-tile__remove,
+.build-tile__label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.build-separator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  color: var(--accent-strong);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.build-tile__remove {
+  min-height: auto;
+  padding: 6px 10px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--accent-strong);
+  font-weight: 700;
+  border-radius: 999px;
+}
+
 .link-button {
   min-height: auto;
   padding: 0;
@@ -366,12 +393,37 @@ input {
   font-weight: 700;
 }
 
+.build-tile__remove {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 6px);
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+}
+
+.build-tile:hover .build-tile__remove,
+.build-tile:focus-within .build-tile__remove {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .build-tile__remove:hover,
 .build-tile__remove:focus-visible,
 .link-button:hover,
 .link-button:focus-visible {
   background: transparent;
   color: var(--accent);
+}
+
+@media (hover: none) {
+  .build-tile__remove {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .panel__actions {

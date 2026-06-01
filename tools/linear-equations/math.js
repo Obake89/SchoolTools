@@ -110,11 +110,39 @@
     return value.numerator === -value.denominator;
   }
 
-  function createExpression(xNumerator = 0, constantNumerator = 0) {
+  function createExpression(xNumerator = 0, constantNumerator = 0, powerTerms = {}) {
     return {
       x: createFraction(xNumerator, 1),
       constant: createFraction(constantNumerator, 1),
+      powers: normalizePowerTerms(powerTerms),
     };
+  }
+
+  function normalizePowerTerms(powerTerms) {
+    const result = {};
+
+    Object.entries(powerTerms || {}).forEach(([rawDegree, rawValue]) => {
+      const degree = Number(rawDegree);
+
+      if (!Number.isInteger(degree) || degree < 2) {
+        return;
+      }
+
+      const safeValue =
+        rawValue && typeof rawValue === "object" && "numerator" in rawValue
+          ? createFraction(rawValue.numerator, rawValue.denominator)
+          : createFraction(Number(rawValue || 0), 1);
+
+      if (!isZeroFraction(safeValue)) {
+        result[degree] = safeValue;
+      }
+    });
+
+    return result;
+  }
+
+  function clonePowerTerms(powerTerms) {
+    return normalizePowerTerms(powerTerms);
   }
 
   function cloneExpression(expression) {
@@ -124,35 +152,135 @@
         expression.constant.numerator,
         expression.constant.denominator,
       ),
+      powers: clonePowerTerms(expression.powers),
     };
   }
 
   function addExpressions(left, right) {
-    return {
+    const result = {
       x: addFractions(left.x, right.x),
       constant: addFractions(left.constant, right.constant),
+      powers: {},
     };
+
+    const degrees = new Set([
+      ...Object.keys(left.powers || {}),
+      ...Object.keys(right.powers || {}),
+    ]);
+
+    degrees.forEach((rawDegree) => {
+      const degree = Number(rawDegree);
+      const leftValue = left.powers?.[degree] || createFraction(0, 1);
+      const rightValue = right.powers?.[degree] || createFraction(0, 1);
+      const sum = addFractions(leftValue, rightValue);
+
+      if (!isZeroFraction(sum)) {
+        result.powers[degree] = sum;
+      }
+    });
+
+    return result;
   }
 
   function subtractExpressions(left, right) {
-    return {
+    const result = {
       x: subtractFractions(left.x, right.x),
       constant: subtractFractions(left.constant, right.constant),
+      powers: {},
     };
+
+    const degrees = new Set([
+      ...Object.keys(left.powers || {}),
+      ...Object.keys(right.powers || {}),
+    ]);
+
+    degrees.forEach((rawDegree) => {
+      const degree = Number(rawDegree);
+      const leftValue = left.powers?.[degree] || createFraction(0, 1);
+      const rightValue = right.powers?.[degree] || createFraction(0, 1);
+      const difference = subtractFractions(leftValue, rightValue);
+
+      if (!isZeroFraction(difference)) {
+        result.powers[degree] = difference;
+      }
+    });
+
+    return result;
   }
 
   function multiplyExpressionByFraction(expression, factor) {
-    return {
+    const result = {
       x: multiplyFractions(expression.x, factor),
       constant: multiplyFractions(expression.constant, factor),
+      powers: {},
     };
+
+    Object.entries(expression.powers || {}).forEach(([rawDegree, value]) => {
+      const scaledValue = multiplyFractions(value, factor);
+
+      if (!isZeroFraction(scaledValue)) {
+        result.powers[Number(rawDegree)] = scaledValue;
+      }
+    });
+
+    return result;
   }
 
   function divideExpressionByFraction(expression, factor) {
-    return {
+    const result = {
       x: divideFractions(expression.x, factor),
       constant: divideFractions(expression.constant, factor),
+      powers: {},
     };
+
+    Object.entries(expression.powers || {}).forEach(([rawDegree, value]) => {
+      const scaledValue = divideFractions(value, factor);
+
+      if (!isZeroFraction(scaledValue)) {
+        result.powers[Number(rawDegree)] = scaledValue;
+      }
+    });
+
+    return result;
+  }
+
+  function createVariableExpression(coefficient, degree = 1) {
+    const expression = createExpression(0, 0);
+
+    if (degree === 1) {
+      expression.x = coefficient;
+    } else if (degree >= 2) {
+      expression.powers[degree] = coefficient;
+    }
+
+    return expression;
+  }
+
+  function hasAnyVariableTerms(expression) {
+    if (!isZeroFraction(expression.x)) {
+      return true;
+    }
+
+    return Object.values(expression.powers || {}).some((value) => !isZeroFraction(value));
+  }
+
+  function expressionsHaveEqualVariableTerms(left, right) {
+    if (!areFractionsEqual(left.x, right.x)) {
+      return false;
+    }
+
+    const degrees = new Set([
+      ...Object.keys(left.powers || {}),
+      ...Object.keys(right.powers || {}),
+    ]);
+
+    return Array.from(degrees).every((rawDegree) => {
+      const degree = Number(rawDegree);
+      return areFractionsEqual(
+        left.powers?.[degree] || createFraction(0, 1),
+        right.powers?.[degree] || createFraction(0, 1),
+      );
+    });
   }
 
   function createEquation(left, right) {
@@ -371,6 +499,11 @@
     const customSpecs = parseCustomTilePoolSpecs(customTilePoolText);
 
     customSpecs.forEach((spec, index) => {
+      if (!spec.expression) {
+        poolTiles.push(createExtraTileFromSpec(spec, index));
+        return;
+      }
+
       const specKey = createExpressionKey(spec.expression);
       const matchingRequiredTiles = groupedRequiredTiles.get(specKey);
 
@@ -401,14 +534,7 @@
       .split(/[|;\n]+/)
       .map((item) => item.trim())
       .filter(Boolean)
-      .map((item) => {
-        try {
-          return parseCustomTileSpec(item);
-        } catch (error) {
-          return null;
-        }
-      })
-      .filter(Boolean);
+      .map(parseCustomTileSpec);
   }
 
   function parseCustomTileSpec(value) {
@@ -417,10 +543,14 @@
     const displayText = String(parts[0] || "").trim();
     const expressionText = String(parts[1] || parts[0] || "").trim();
     const parsedExpression = parseTileExpressionText(expressionText);
+    const displayLatex =
+      separator || looksLikeMathDisplay(displayText) || !parsedExpression
+        ? displayText
+        : formatExpressionAsLatex(parsedExpression);
 
     return {
       displayText,
-      displayLatex: separator ? displayText : formatExpressionAsLatex(parsedExpression),
+      displayLatex,
       expressionText,
       expression: parsedExpression,
     };
@@ -442,13 +572,7 @@
     try {
       return parseLinearExpression(value);
     } catch (error) {
-      const latexExpression = parseLatexMonomialExpression(value);
-
-      if (latexExpression) {
-        return latexExpression;
-      }
-
-      throw error;
+      return parseLatexMonomialExpression(value) || parsePowerExpression(value);
     }
   }
 
@@ -466,26 +590,15 @@
       return null;
     }
 
-    if (normalizedValue === "x") {
-      return createExpression(1, 0);
-    }
+    const normalizedPlainVariable = normalizedValue
+      .replace(/(-?)\\frac\{(-?\d+)\}\{(\d+)\}/g, "$1$2/$3");
+    const variableTerm = parseVariableTermText(normalizedPlainVariable);
 
-    if (normalizedValue === "-x") {
-      return createExpression(-1, 0);
-    }
-
-    const variableFractionMatch = normalizedValue.match(
-      /^(-?)\\frac\{(-?\d+)\}\{(\d+)\}x$/,
-    );
-
-    if (variableFractionMatch) {
-      const sign = variableFractionMatch[1] === "-" ? -1 : 1;
-      const numerator = Number(variableFractionMatch[2]);
-      const denominator = Number(variableFractionMatch[3]);
-      return {
-        x: createFraction(sign * numerator, denominator),
-        constant: createFraction(0, 1),
-      };
+    if (variableTerm) {
+      return createVariableExpression(
+        variableTerm.coefficient,
+        variableTerm.degree,
+      );
     }
 
     const constantFractionMatch = normalizedValue.match(
@@ -496,35 +609,104 @@
       const sign = constantFractionMatch[1] === "-" ? -1 : 1;
       const numerator = Number(constantFractionMatch[2]);
       const denominator = Number(constantFractionMatch[3]);
-      return {
-        x: createFraction(0, 1),
-        constant: createFraction(sign * numerator, denominator),
-      };
-    }
-
-    const variableMatch = normalizedValue.match(/^(-?\d+)x$/);
-
-    if (variableMatch) {
-      return {
-        x: createFraction(Number(variableMatch[1]), 1),
-        constant: createFraction(0, 1),
-      };
+      const expression = createExpression(0, 0);
+      expression.constant = createFraction(sign * numerator, denominator);
+      return expression;
     }
 
     const constantMatch = normalizedValue.match(/^-?\d+$/);
 
     if (constantMatch) {
-      return {
-        x: createFraction(0, 1),
-        constant: createFraction(Number(constantMatch[0]), 1),
-      };
+      const expression = createExpression(0, 0);
+      expression.constant = createFraction(Number(constantMatch[0]), 1);
+      return expression;
     }
 
     return null;
   }
 
+  function parsePowerExpression(value) {
+    const normalizedValue = String(value || "")
+      .trim()
+      .replace(/^\$+|\$+$/g, "")
+      .replace(/\\left/g, "")
+      .replace(/\\right/g, "")
+      .replace(/\s+/g, "");
+
+    if (!normalizedValue) {
+      return null;
+    }
+
+    const normalizedVariableValue = normalizedValue
+      .replace(/(-?)\\frac\{(-?\d+)\}\{(\d+)\}/g, "$1$2/$3");
+    const variableTerm = parseVariableTermText(normalizedVariableValue);
+
+    if (variableTerm) {
+      return createVariableExpression(
+        variableTerm.coefficient,
+        variableTerm.degree,
+      );
+    }
+
+    const constantPowerMatch =
+      normalizedValue.match(/^\(?(-?\d+)\)?\^\{?(\d+)\}?$/) ||
+      normalizedValue.match(/^\{(-?\d+)\}\^\{?(\d+)\}?$/);
+
+    if (constantPowerMatch) {
+      const base = Number(constantPowerMatch[1]);
+      const exponent = Number(constantPowerMatch[2]);
+
+      if (Number.isInteger(base) && Number.isInteger(exponent) && exponent >= 0) {
+        const expression = createExpression(0, 0);
+        expression.constant = createFraction(base ** exponent, 1);
+        return expression;
+      }
+    }
+
+    return null;
+  }
+
+  function parseLatexCoefficientFraction(value) {
+    const match = String(value || "").match(/^(-?)\\frac\{(-?\d+)\}\{(\d+)\}$/);
+
+    if (!match) {
+      return null;
+    }
+
+    const sign = match[1] === "-" ? -1 : 1;
+    const numerator = Number(match[2]);
+    const denominator = Number(match[3]);
+
+    if (!Number.isInteger(numerator) || !Number.isInteger(denominator) || denominator === 0) {
+      return null;
+    }
+
+    return createFraction(sign * numerator, denominator);
+  }
+
+  function looksLikeMathDisplay(value) {
+    return /[\\^{}]/.test(String(value || ""));
+  }
+
   function createRequiredMonomialTiles(expression, side) {
     const tiles = [];
+
+    Object.keys(expression.powers || {})
+      .map(Number)
+      .sort((left, right) => right - left)
+      .forEach((degree) => {
+        const coefficient = expression.powers[degree];
+
+        if (!isZeroFraction(coefficient)) {
+          tiles.push(
+            createMonomialTile(
+              { type: "power", value: coefficient, degree },
+              side,
+              tiles.length,
+            ),
+          );
+        }
+      });
 
     if (!isZeroFraction(expression.x)) {
       tiles.push(createMonomialTile({ type: "variable", value: expression.x }, side, tiles.length));
@@ -545,17 +727,31 @@
 
   function createMonomialTile(term, side, order) {
     const label =
-      term.type === "variable"
-        ? formatVariableMonomialAsPlainText(term.value)
-        : formatFractionAsPlainText(term.value);
+      term.type === "constant"
+        ? formatFractionAsPlainText(term.value)
+        : formatVariableMonomialAsPlainText(term.value, term.degree || 1);
     const latex =
-      term.type === "variable"
-        ? formatVariableMonomialAsLatex(term.value)
-        : formatFractionAsLatex(term.value);
+      term.type === "constant"
+        ? formatFractionAsLatex(term.value)
+        : formatVariableMonomialAsLatex(term.value, term.degree || 1);
     const expression =
-      term.type === "variable"
-        ? { x: term.value, constant: createFraction(0, 1) }
-        : { x: createFraction(0, 1), constant: term.value };
+      term.type === "constant"
+        ? createExpression(0, 0, {})
+        : createExpression(0, 0, {});
+
+    if (term.type === "constant") {
+      expression.constant = term.value;
+    } else {
+      return {
+        id: `${side}-${order}-${sanitizeIdPart(label) || "zero"}`,
+        side,
+        order,
+        required: true,
+        label,
+        latex,
+        expression: createVariableExpression(term.value, term.degree || 1),
+      };
+    }
 
     return {
       id: `${side}-${order}-${sanitizeIdPart(label) || "zero"}`,
@@ -625,14 +821,13 @@
 
   function createExtraConstantTile(value) {
     const safeValue = typeof value === "number" ? createFraction(value, 1) : value;
+    const expression = createExpression(0, 0);
+    expression.constant = safeValue;
 
     return {
       label: formatFractionAsPlainText(safeValue),
       latex: formatFractionAsLatex(safeValue),
-      expression: {
-        x: createFraction(0, 1),
-        constant: safeValue,
-      },
+      expression,
       required: false,
     };
   }
@@ -641,10 +836,7 @@
     return {
       label: formatVariableMonomialAsPlainText(value),
       latex: formatVariableMonomialAsLatex(value),
-      expression: {
-        x: value,
-        constant: createFraction(0, 1),
-      },
+      expression: createVariableExpression(value, 1),
       required: false,
     };
   }
@@ -1079,6 +1271,31 @@
     };
   }
 
+  function parseVariableTermText(value) {
+    const variableMatch = String(value || "").match(
+      /^([+-]?)(\d+(?:\/\d+)?)?x(?:\^(\d+)|\^\{(\d+)\})?$/,
+    );
+
+    if (!variableMatch) {
+      return null;
+    }
+
+    const sign = variableMatch[1] === "-" ? -1 : 1;
+    const coefficientText = variableMatch[2] || "1";
+    const degreeText = variableMatch[3] || variableMatch[4] || "1";
+    const degree = Number(degreeText);
+    const coefficient = parseFractionText(coefficientText);
+
+    if (!coefficient || !Number.isInteger(degree) || degree < 1) {
+      return null;
+    }
+
+    return {
+      degree,
+      coefficient: multiplyFractions(createFraction(sign, 1), coefficient),
+    };
+  }
+
   function parseMonomial(rawValue) {
     if (typeof rawValue !== "string") {
       return { isValid: false, message: "Wpisz jednomian, na przykład 3, -2 albo x." };
@@ -1097,12 +1314,10 @@
       };
     }
 
-    const variableMatch = normalizedValue.match(/^([+-]?)(\d+(?:\/\d+)?)?x$/);
+    const variableTerm = parseVariableTermText(normalizedValue);
 
-    if (variableMatch) {
-      const sign = variableMatch[1] === "-" ? -1 : 1;
-      const coefficientText = variableMatch[2] || "1";
-      const coefficient = parseFractionText(coefficientText);
+    if (variableTerm) {
+      const coefficient = variableTerm.coefficient;
 
       if (!coefficient) {
         return { isValid: false, message: "Nie udało się odczytać współczynnika przy x." };
@@ -1111,11 +1326,12 @@
       return {
         isValid: true,
         kind: "variable",
-        value: multiplyFractions(createFraction(sign, 1), coefficient),
-        expression: {
-          x: multiplyFractions(createFraction(sign, 1), coefficient),
-          constant: createFraction(0, 1),
-        },
+        degree: variableTerm.degree,
+        value: variableTerm.coefficient,
+        expression: createVariableExpression(
+          variableTerm.coefficient,
+          variableTerm.degree,
+        ),
       };
     }
 
@@ -1128,14 +1344,14 @@
       };
     }
 
+    const expression = createExpression(0, 0);
+    expression.constant = constant;
+
     return {
       isValid: true,
       kind: "constant",
       value: constant,
-      expression: {
-        x: createFraction(0, 1),
-        constant,
-      },
+      expression,
     };
   }
 
@@ -1229,7 +1445,7 @@
       return isZeroFraction(monomial.value);
     }
 
-    return isZeroFraction(monomial.expression.x);
+    return !hasAnyVariableTerms(monomial.expression);
   }
 
   function formatEquationAsLatex(equation) {
@@ -1239,28 +1455,26 @@
   function formatExpressionAsLatex(expression) {
     const parts = [];
 
+    Object.keys(expression.powers || {})
+      .map(Number)
+      .sort((left, right) => right - left)
+      .forEach((degree) => {
+        const coefficient = expression.powers[degree];
+
+        if (!isZeroFraction(coefficient)) {
+          appendLatexTerm(parts, formatVariableMonomialAsLatex(coefficient, degree), coefficient);
+        }
+      });
+
     if (!isZeroFraction(expression.x)) {
       const coefficient = expression.x;
 
-      if (isOneFraction(coefficient)) {
-        parts.push("x");
-      } else if (isNegativeOneFraction(coefficient)) {
-        parts.push("-x");
-      } else {
-        parts.push(`${formatFractionAsLatex(coefficient)}x`);
-      }
+      appendLatexTerm(parts, formatVariableMonomialAsLatex(coefficient, 1), coefficient);
     }
 
     if (!isZeroFraction(expression.constant)) {
       const constantLatex = formatFractionAsLatex(expression.constant);
-
-      if (parts.length === 0) {
-        parts.push(constantLatex);
-      } else if (expression.constant.numerator > 0) {
-        parts.push(`+ ${constantLatex}`);
-      } else {
-        parts.push(`- ${formatFractionAsLatex(negateFraction(expression.constant))}`);
-      }
+      appendLatexTerm(parts, constantLatex, expression.constant);
     }
 
     if (parts.length === 0) {
@@ -1268,6 +1482,24 @@
     }
 
     return parts.join(" ");
+  }
+
+  function appendLatexTerm(parts, latexTerm, coefficient) {
+    if (parts.length === 0) {
+      parts.push(latexTerm);
+      return;
+    }
+
+    if (coefficient.numerator > 0) {
+      parts.push(`+ ${latexTerm}`);
+      return;
+    }
+
+    parts.push(`- ${stripLeadingMinus(latexTerm)}`);
+  }
+
+  function stripLeadingMinus(value) {
+    return String(value || "").startsWith("-") ? String(value).slice(1) : String(value || "");
   }
 
   function formatFractionAsLatex(value) {
@@ -1287,28 +1519,32 @@
     return `${value.numerator}/${value.denominator}`;
   }
 
-  function formatVariableMonomialAsPlainText(value) {
+  function formatVariableMonomialAsPlainText(value, degree = 1) {
+    const variablePart = degree === 1 ? "x" : `x^${degree}`;
+
     if (isOneFraction(value)) {
-      return "x";
+      return variablePart;
     }
 
     if (isNegativeOneFraction(value)) {
-      return "-x";
+      return `-${variablePart}`;
     }
 
-    return `${formatFractionAsPlainText(value)}x`;
+    return `${formatFractionAsPlainText(value)}${variablePart}`;
   }
 
-  function formatVariableMonomialAsLatex(value) {
+  function formatVariableMonomialAsLatex(value, degree = 1) {
+    const variablePart = degree === 1 ? "x" : `x^{${degree}}`;
+
     if (isOneFraction(value)) {
-      return "x";
+      return variablePart;
     }
 
     if (isNegativeOneFraction(value)) {
-      return "-x";
+      return `-${variablePart}`;
     }
 
-    return `${formatFractionAsLatex(value)}x`;
+    return `${formatFractionAsLatex(value)}${variablePart}`;
   }
 
   function formatMonomialPlain(parsedMonomial) {
@@ -1316,7 +1552,7 @@
       return formatFractionAsPlainText(parsedMonomial.value);
     }
 
-    return formatVariableMonomialAsPlainText(parsedMonomial.value);
+    return formatVariableMonomialAsPlainText(parsedMonomial.value, parsedMonomial.degree || 1);
   }
 
   function formatMonomialLatex(parsedMonomial) {
@@ -1324,7 +1560,7 @@
       return formatFractionAsLatex(parsedMonomial.value);
     }
 
-    return formatVariableMonomialAsLatex(parsedMonomial.value);
+    return formatVariableMonomialAsLatex(parsedMonomial.value, parsedMonomial.degree || 1);
   }
 
   function formatOperationLabel(operationType, parsedMonomial) {
@@ -1350,7 +1586,7 @@
   }
 
   function getEquationStatus(equation) {
-    if (areFractionsEqual(equation.left.x, equation.right.x)) {
+    if (expressionsHaveEqualVariableTerms(equation.left, equation.right)) {
       if (areFractionsEqual(equation.left.constant, equation.right.constant)) {
         return {
           type: "identity",
@@ -1389,8 +1625,9 @@
   function isSolvedForm(variableSide, numericSide) {
     return (
       areFractionsEqual(variableSide.x, createFraction(1, 1)) &&
+      !Object.values(variableSide.powers || {}).some((value) => !isZeroFraction(value)) &&
       isZeroFraction(variableSide.constant) &&
-      isZeroFraction(numericSide.x)
+      !hasAnyVariableTerms(numericSide)
     );
   }
 
@@ -1452,32 +1689,13 @@
   }
 
   function parseExpressionTerm(rawTerm) {
-    if (rawTerm === "x") {
-      return createExpression(1, 0);
-    }
+    const variableTerm = parseVariableTermText(rawTerm);
 
-    if (rawTerm === "-x") {
-      return createExpression(-1, 0);
-    }
-
-    if (rawTerm.endsWith("x")) {
-      const coefficientText = rawTerm.slice(0, -1);
-      const safeCoefficientText =
-        coefficientText === "" || coefficientText === "+"
-          ? "1"
-          : coefficientText === "-"
-            ? "-1"
-            : coefficientText;
-      const coefficient = parseFractionText(safeCoefficientText);
-
-      if (!coefficient) {
-        return null;
-      }
-
-      return {
-        x: coefficient,
-        constant: createFraction(0, 1),
-      };
+    if (variableTerm) {
+      return createVariableExpression(
+        variableTerm.coefficient,
+        variableTerm.degree,
+      );
     }
 
     const constant = parseFractionText(rawTerm);
@@ -1486,10 +1704,9 @@
       return null;
     }
 
-    return {
-      x: createFraction(0, 1),
-      constant,
-    };
+    const expression = createExpression(0, 0);
+    expression.constant = constant;
+    return expression;
   }
 
   function getDifficultyMeta(difficulty) {
@@ -1513,11 +1730,20 @@
   }
 
   function createExpressionKey(expression) {
+    const powerParts = Object.keys(expression.powers || {})
+      .map(Number)
+      .sort((left, right) => left - right)
+      .map((degree) => {
+        const value = expression.powers[degree];
+        return `${degree},${value.numerator},${value.denominator}`;
+      });
+
     return [
       expression.x.numerator,
       expression.x.denominator,
       expression.constant.numerator,
       expression.constant.denominator,
+      powerParts.join("|"),
     ].join(":");
   }
 

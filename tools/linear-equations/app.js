@@ -286,21 +286,21 @@ function renderTilePool() {
   });
 }
 
-function createPlacedTile(tileId, side, index) {
+function createPlacedTile(tileId, side) {
   const tile = getTileById(tileId);
   const wrapper = document.createElement("div");
   wrapper.className = "build-tile";
 
   const label = document.createElement("span");
-  renderTileLabel(label, tile, {
-    prefixLatex: `\\text{${index + 1}. }`,
-    prefixText: `${index + 1}. `,
-  });
+  label.className = "build-tile__label";
+  renderTileLabel(label, tile);
 
   const removeButton = document.createElement("button");
   removeButton.type = "button";
   removeButton.className = "build-tile__remove";
   removeButton.textContent = "Usuń";
+  removeButton.setAttribute("aria-label", `Usuń klocek ${tile.label}`);
+  removeButton.title = "Usuń klocek";
   removeButton.disabled = state.isArrangementSolved;
   removeButton.addEventListener("click", () => removePlacedTile(side, tileId));
 
@@ -308,17 +308,30 @@ function createPlacedTile(tileId, side, index) {
   return wrapper;
 }
 
+function createBuildSeparator() {
+  const separator = document.createElement("span");
+  separator.className = "build-separator";
+  separator.setAttribute("aria-hidden", "true");
+  separator.textContent = "+";
+  return separator;
+}
+
+function renderBuildSide(container, tileIds, side) {
+  tileIds.forEach((tileId, index) => {
+    container.append(createPlacedTile(tileId, side));
+
+    if (index < tileIds.length - 1) {
+      container.append(createBuildSeparator());
+    }
+  });
+}
+
 function renderBuildLists() {
   elements.leftBuildList.innerHTML = "";
   elements.rightBuildList.innerHTML = "";
 
-  state.placedLeftIds.forEach((tileId, index) => {
-    elements.leftBuildList.append(createPlacedTile(tileId, "left", index));
-  });
-
-  state.placedRightIds.forEach((tileId, index) => {
-    elements.rightBuildList.append(createPlacedTile(tileId, "right", index));
-  });
+  renderBuildSide(elements.leftBuildList, state.placedLeftIds, "left");
+  renderBuildSide(elements.rightBuildList, state.placedRightIds, "right");
 }
 
 function renderEquationCards() {

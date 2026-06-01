@@ -86,6 +86,8 @@ Ważne:
 - `tilePool` jest opcjonalne i zawiera własną listę rozsypanych jednomianów oddzielonych `;`, `|` albo nową linią,
 - prostsze jednomiany możesz wpisać w `tilePool` bezpośrednio w LaTeX-u, na przykład `\frac{3}{2}x` albo `-\frac{5}{2}`,
 - w `tilePool` możesz używać zapisu `to-co-ma-być-widoczne=>wyrażenie`, jeśli chcesz pokazać klocek w LaTeX-u, ale jego wartość podać zwykłym tekstem, na przykład `\frac{3}{2}x=>3/2x` albo `-\frac{5}{2}=>-5/2`,
+- proste potęgi i jednomiany wyższego stopnia też są obsługiwane, na przykład `3^2`, `x^1`, `3x^2` albo `\frac{3}{2}x^{2}`,
+- jeśli chcesz pokazać bardziej ozdobny zapis albo potęgę, która ma się sprowadzić do innej wartości, najbezpieczniej użyj formatu `widok=>wartość`, na przykład `3^2=>9`,
 - jeśli w `tilePool` pominiesz któryś potrzebny jednomian, narzędzie i tak go dopisze, żeby zadanie dało się rozwiązać.
 
 Nie ma sztywnego limitu liczby pozycji w `tilePool`, ale w praktyce warto trzymać się raczej krótszej rozsypanki, żeby zadanie było czytelne na telefonie i tablecie.
