@@ -401,7 +401,14 @@
       .split(/[|;\n]+/)
       .map((item) => item.trim())
       .filter(Boolean)
-      .map(parseCustomTileSpec);
+      .map((item) => {
+        try {
+          return parseCustomTileSpec(item);
+        } catch (error) {
+          return null;
+        }
+      })
+      .filter(Boolean);
   }
 
   function parseCustomTileSpec(value) {
@@ -409,7 +416,7 @@
     const parts = separator ? value.split(separator) : [value];
     const displayText = String(parts[0] || "").trim();
     const expressionText = String(parts[1] || parts[0] || "").trim();
-    const parsedExpression = parseLinearExpression(expressionText);
+    const parsedExpression = parseTileExpressionText(expressionText);
 
     return {
       displayText,
@@ -429,6 +436,91 @@
       latex: spec.displayLatex,
       expression: spec.expression,
     };
+  }
+
+  function parseTileExpressionText(value) {
+    try {
+      return parseLinearExpression(value);
+    } catch (error) {
+      const latexExpression = parseLatexMonomialExpression(value);
+
+      if (latexExpression) {
+        return latexExpression;
+      }
+
+      throw error;
+    }
+  }
+
+  function parseLatexMonomialExpression(value) {
+    const normalizedValue = String(value || "")
+      .trim()
+      .replace(/^\$+|\$+$/g, "")
+      .replace(/\\left/g, "")
+      .replace(/\\right/g, "")
+      .replace(/\\cdot/g, "")
+      .replace(/\\dfrac/g, "\\frac")
+      .replace(/\s+/g, "");
+
+    if (!normalizedValue) {
+      return null;
+    }
+
+    if (normalizedValue === "x") {
+      return createExpression(1, 0);
+    }
+
+    if (normalizedValue === "-x") {
+      return createExpression(-1, 0);
+    }
+
+    const variableFractionMatch = normalizedValue.match(
+      /^(-?)\\frac\{(-?\d+)\}\{(\d+)\}x$/,
+    );
+
+    if (variableFractionMatch) {
+      const sign = variableFractionMatch[1] === "-" ? -1 : 1;
+      const numerator = Number(variableFractionMatch[2]);
+      const denominator = Number(variableFractionMatch[3]);
+      return {
+        x: createFraction(sign * numerator, denominator),
+        constant: createFraction(0, 1),
+      };
+    }
+
+    const constantFractionMatch = normalizedValue.match(
+      /^(-?)\\frac\{(-?\d+)\}\{(\d+)\}$/,
+    );
+
+    if (constantFractionMatch) {
+      const sign = constantFractionMatch[1] === "-" ? -1 : 1;
+      const numerator = Number(constantFractionMatch[2]);
+      const denominator = Number(constantFractionMatch[3]);
+      return {
+        x: createFraction(0, 1),
+        constant: createFraction(sign * numerator, denominator),
+      };
+    }
+
+    const variableMatch = normalizedValue.match(/^(-?\d+)x$/);
+
+    if (variableMatch) {
+      return {
+        x: createFraction(Number(variableMatch[1]), 1),
+        constant: createFraction(0, 1),
+      };
+    }
+
+    const constantMatch = normalizedValue.match(/^-?\d+$/);
+
+    if (constantMatch) {
+      return {
+        x: createFraction(0, 1),
+        constant: createFraction(Number(constantMatch[0]), 1),
+      };
+    }
+
+    return null;
   }
 
   function createRequiredMonomialTiles(expression, side) {
