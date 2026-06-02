@@ -289,7 +289,10 @@ function renderTilePool() {
 function createPlacedTile(tileId, side) {
   const tile = getTileById(tileId);
   const wrapper = document.createElement("div");
-  wrapper.className = "build-tile";
+  wrapper.className = "build-tile-stack";
+
+  const card = document.createElement("div");
+  card.className = "build-tile";
 
   const label = document.createElement("span");
   label.className = "build-tile__label";
@@ -304,7 +307,8 @@ function createPlacedTile(tileId, side) {
   removeButton.disabled = state.isArrangementSolved;
   removeButton.addEventListener("click", () => removePlacedTile(side, tileId));
 
-  wrapper.append(label, removeButton);
+  card.append(label);
+  wrapper.append(card, removeButton);
   return wrapper;
 }
 
