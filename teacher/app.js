@@ -1,9 +1,20 @@
+const TOOL_DEFAULTS = {
+  "number-line": {
+    hint: "Ustawienia dla narzedzia: os liczbowa.",
+    title: "Os liczbowa - trening",
+  },
+  "linear-equations": {
+    hint: "Ustawienia dla narzedzia: rownania liniowe.",
+    title: "Rownania liniowe - trening",
+  },
+};
+
 const teacherElements = {
   form: document.querySelector("#assignment-form"),
   toolSelect: document.querySelector("#tool-select"),
   classSelect: document.querySelector("#class-select"),
-  numberLineSettings: document.querySelector("#number-line-settings"),
-  linearEquationsSettings: document.querySelector("#linear-equations-settings"),
+  toolSettingsHint: document.querySelector("#tool-settings-hint"),
+  toolSettingsSections: Array.from(document.querySelectorAll("[data-tool-settings]")),
   assignmentTitleInput: document.querySelector("#assignment-title-input"),
   apiWarning: document.querySelector("#api-warning"),
   assignmentLinkOutput: document.querySelector("#assignment-link-output"),
@@ -89,15 +100,41 @@ function buildStudentAssignmentLink(assignmentId, tool) {
   return url.toString();
 }
 
+function setSectionFieldsDisabled(section, isDisabled) {
+  section.querySelectorAll("input, select, textarea, button").forEach((field) => {
+    field.disabled = isDisabled;
+  });
+}
+
+function shouldUseDefaultTitle(currentTitle) {
+  const normalizedTitle = String(currentTitle ?? "").trim();
+
+  if (!normalizedTitle) {
+    return true;
+  }
+
+  return Object.values(TOOL_DEFAULTS).some(
+    (toolMeta) => toolMeta.title === normalizedTitle,
+  );
+}
+
 function renderToolSettings() {
   const selectedTool = teacherElements.toolSelect.value;
-  const isLinearEquations = selectedTool === "linear-equations";
+  const toolMeta = TOOL_DEFAULTS[selectedTool] || TOOL_DEFAULTS["number-line"];
 
-  teacherElements.numberLineSettings.hidden = isLinearEquations;
-  teacherElements.linearEquationsSettings.hidden = !isLinearEquations;
-  teacherElements.assignmentTitleInput.value = isLinearEquations
-    ? "Równania liniowe - trening"
-    : "Oś liczbowa - trening";
+  teacherElements.toolSettingsSections.forEach((section) => {
+    const isActive = section.dataset.toolSettings === selectedTool;
+    section.hidden = !isActive;
+    setSectionFieldsDisabled(section, !isActive);
+  });
+
+  if (teacherElements.toolSettingsHint) {
+    teacherElements.toolSettingsHint.textContent = toolMeta.hint;
+  }
+
+  if (shouldUseDefaultTitle(teacherElements.assignmentTitleInput.value)) {
+    teacherElements.assignmentTitleInput.value = toolMeta.title;
+  }
 }
 
 async function handleTeacherSubmit(event) {
@@ -118,14 +155,14 @@ async function handleTeacherSubmit(event) {
 
   if (!payload.classId) {
     renderTeacherFeedback(
-      "Wybierz klasę dla tego zadania.",
+      "Wybierz klase dla tego zadania.",
       "warning",
     );
     return;
   }
 
   try {
-    renderTeacherFeedback("Tworzę zadanie i przygotowuję link dla uczniów...");
+    renderTeacherFeedback("Tworze zadanie i przygotowuje link dla uczniow...");
     const api = window.createAssignmentApiClient({ apiUrl });
     const response = await api.createAssignment(payload);
     const assignmentLink = buildStudentAssignmentLink(
@@ -138,12 +175,12 @@ async function handleTeacherSubmit(event) {
     teacherElements.resultCard.hidden = false;
 
     renderTeacherFeedback(
-      "Gotowe. Link dla uczniów został wygenerowany.",
+      "Gotowe. Link dla uczniow zostal wygenerowany.",
       "success",
     );
   } catch (error) {
     renderTeacherFeedback(
-      `Nie udało się utworzyć zadania. ${error.message}`,
+      `Nie udalo sie utworzyc zadania. ${error.message}`,
       "warning",
     );
   }
@@ -152,10 +189,10 @@ async function handleTeacherSubmit(event) {
 async function handleCopyLink() {
   try {
     await navigator.clipboard.writeText(teacherElements.assignmentLinkOutput.value);
-    renderTeacherFeedback("Link został skopiowany do schowka.", "success");
+    renderTeacherFeedback("Link zostal skopiowany do schowka.", "success");
   } catch (error) {
     renderTeacherFeedback(
-      "Nie udało się skopiować linku. Skopiuj go ręcznie z pola tekstowego.",
+      "Nie udalo sie skopiowac linku. Skopiuj go recznie z pola tekstowego.",
       "warning",
     );
   }
@@ -166,7 +203,7 @@ function populateClassOptions(classes) {
 
   const placeholder = document.createElement("option");
   placeholder.value = "";
-  placeholder.textContent = "Wybierz klasę";
+  placeholder.textContent = "Wybierz klase";
   teacherElements.classSelect.append(placeholder);
 
   classes.forEach((classEntry) => {
@@ -183,9 +220,9 @@ async function loadClasses() {
   if (!apiUrl) {
     teacherElements.apiWarning.hidden = false;
     teacherElements.apiWarning.textContent =
-      "Ustaw adres Apps Script w shared/config.js, aby wczytać klasy z arkusza.";
+      "Ustaw adres Apps Script w shared/config.js, aby wczytac klasy z arkusza.";
     teacherElements.classSelect.innerHTML =
-      '<option value="">Brak połączenia z arkuszem</option>';
+      '<option value="">Brak polaczenia z arkuszem</option>';
     return;
   }
 
@@ -197,9 +234,9 @@ async function loadClasses() {
   } catch (error) {
     teacherElements.apiWarning.hidden = false;
     teacherElements.apiWarning.textContent =
-      `Nie udało się wczytać klas z arkusza. ${error.message}`;
+      `Nie udalo sie wczytac klas z arkusza. ${error.message}`;
     teacherElements.classSelect.innerHTML =
-      '<option value="">Nie udało się wczytać klas</option>';
+      '<option value="">Nie udalo sie wczytac klas</option>';
   }
 }
 

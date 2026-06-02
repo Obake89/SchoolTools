@@ -52,7 +52,15 @@
               </label>
             </div>
 
-            <section id="number-line-settings" class="tool-settings">
+            <p id="tool-settings-hint" class="tool-settings__hint" aria-live="polite">
+              Ustawienia dla narzędzia: oś liczbowa.
+            </p>
+
+            <section
+              id="number-line-settings"
+              class="tool-settings"
+              data-tool-settings="number-line"
+            >
               <div class="grid grid--2">
               <label class="field">
                 <span>Typ liczb</span>
@@ -90,7 +98,12 @@
             </div>
             </section>
 
-            <section id="linear-equations-settings" class="tool-settings" hidden>
+            <section
+              id="linear-equations-settings"
+              class="tool-settings"
+              data-tool-settings="linear-equations"
+              hidden
+            >
               <div class="grid grid--2">
                 <label class="field">
                   <span>Poziom trudności</span>

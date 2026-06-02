@@ -19,6 +19,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -116,6 +120,21 @@ textarea {
 .tool-settings {
   display: grid;
   gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+}
+
+.tool-settings__hint {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  line-height: 1.5;
+  font-weight: 700;
 }
 
 .grid {
