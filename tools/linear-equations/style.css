@@ -363,6 +363,19 @@ input {
 .build-tile {
   color: var(--text);
   background: #eff6ff;
+  cursor: pointer;
+}
+
+.build-tile:hover,
+.build-tile:focus-visible {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: var(--accent-strong);
+}
+
+.build-tile:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .build-tile__label {
@@ -401,17 +414,11 @@ input {
 }
 
 .build-tile__remove {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.18s ease;
-  white-space: nowrap;
-  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
-}
-
-.build-tile-stack:hover .build-tile__remove,
-.build-tile-stack:focus-within .build-tile__remove {
   opacity: 1;
   pointer-events: auto;
+  transition: color 0.18s ease, background 0.18s ease;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
 }
 
 .build-tile__remove:hover,
@@ -420,13 +427,6 @@ input {
 .link-button:focus-visible {
   background: transparent;
   color: var(--accent);
-}
-
-@media (hover: none) {
-  .build-tile__remove {
-    opacity: 1;
-    pointer-events: auto;
-  }
 }
 
 .panel__actions {

@@ -102,6 +102,10 @@ function renderTileLabel(element, tile, options = {}) {
 }
 
 function renderFeedback(element, message, status = "default") {
+  if (!element) {
+    return;
+  }
+
   element.textContent = message;
 
   if (status === "default") {
@@ -197,8 +201,10 @@ async function buildNewTask() {
 function renderTaskInfo() {
   const difficultyMeta = getDifficultyMeta(state.difficulty);
   elements.difficultySelect.value = state.difficulty;
-  elements.taskTitle.textContent =
-    state.assignmentConfig?.title || state.task.title;
+  if (elements.taskTitle) {
+    elements.taskTitle.textContent =
+      state.assignmentConfig?.title || state.task.title;
+  }
   const groupText = state.task.group ? ` Grupa: ${state.task.group}.` : "";
   const assignmentInstructions =
     state.assignmentConfig?.settings?.studentInstructions || "";
@@ -291,8 +297,13 @@ function createPlacedTile(tileId, side) {
   const wrapper = document.createElement("div");
   wrapper.className = "build-tile-stack";
 
-  const card = document.createElement("div");
+  const card = document.createElement("button");
+  card.type = "button";
   card.className = "build-tile";
+  card.disabled = state.isArrangementSolved;
+  card.setAttribute("aria-label", `Remove tile ${tile.label}`);
+  card.title = "Remove tile";
+  card.addEventListener("click", () => removePlacedTile(side, tileId));
 
   const label = document.createElement("span");
   label.className = "build-tile__label";
@@ -412,8 +423,19 @@ function handleTilePick(tileId) {
 }
 
 function removePlacedTile(side, tileId) {
+  if (state.isArrangementSolved) {
+    return;
+  }
+
   const list = side === "left" ? state.placedLeftIds : state.placedRightIds;
-  const nextList = list.filter((currentId) => currentId !== tileId);
+  const tileIndex = list.indexOf(tileId);
+
+  if (tileIndex === -1) {
+    return;
+  }
+
+  const nextList = [...list];
+  nextList.splice(tileIndex, 1);
 
   if (side === "left") {
     state.placedLeftIds = nextList;
