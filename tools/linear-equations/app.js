@@ -5,7 +5,6 @@ const {
   createTask,
   createTaskFromSheetRow,
   formatEquationAsLatex,
-  getDifficultyMeta,
   getEquationStatus,
   validateArrangement,
 } = window.LinearEquationsMath;
@@ -36,9 +35,6 @@ const elements = {
   clearRightButton: document.querySelector("#clear-right-button"),
   targetLeftButton: document.querySelector("#target-left-button"),
   targetRightButton: document.querySelector("#target-right-button"),
-  taskTitle: document.querySelector("#task-title"),
-  taskDescription: document.querySelector("#task-description"),
-  difficultyBadge: document.querySelector("#difficulty-badge"),
   stageOnePanel: document.querySelector("#stage-one-panel"),
   stageTwoPanel: document.querySelector("#stage-two-panel"),
   tilePool: document.querySelector("#tile-pool"),
@@ -199,15 +195,8 @@ async function buildNewTask() {
 }
 
 function renderTaskInfo() {
-  const difficultyMeta = getDifficultyMeta(state.difficulty);
   elements.difficultySelect.value = state.difficulty;
-  if (elements.taskTitle) {
-    elements.taskTitle.textContent =
-      state.assignmentConfig?.title || state.task.title;
-  }
-  const groupText = state.task.group ? ` Grupa: ${state.task.group}.` : "";
-  const assignmentInstructions =
-    state.assignmentConfig?.settings?.studentInstructions || "";
+  return;
   elements.taskDescription.textContent = assignmentInstructions
     ? `${difficultyMeta.description}${groupText} ${assignmentInstructions}`
     : `${difficultyMeta.description}${groupText} Etap 1: uprość równanie do sumy algebraicznej z jednomianów. Etap 2: rozwiązuj je krok po kroku. ${state.task.instructions}`;
@@ -229,6 +218,7 @@ function applyAssignmentConfig(config) {
   state.assignmentConfig = config;
   state.difficulty = String(config.settings?.difficulty || "easy").trim() || "easy";
   state.taskGroup = String(config.settings?.taskGroup || "").trim();
+  return;
 
   if (config.title) {
     elements.taskTitle.textContent = config.title;
