@@ -20,6 +20,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -145,6 +149,69 @@ input {
   color: var(--accent-strong);
   text-decoration: none;
   font-weight: 700;
+}
+
+.assignment-panel {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.assignment-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.assignment-panel__eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.85rem;
+}
+
+.assignment-panel__header h2 {
+  margin: 0;
+}
+
+.assignment-panel__text {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.assignment-progress {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  min-width: 120px;
+  padding: 12px 14px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.assignment-progress span {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.student-setup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: end;
+}
+
+.student-setup .field {
+  flex: 1 1 280px;
 }
 
 .toolbar {
@@ -516,7 +583,8 @@ input {
 
 @media (max-width: 760px) {
   .hero,
-  .toolbar {
+  .toolbar,
+  .student-setup {
     flex-direction: column;
   }
 

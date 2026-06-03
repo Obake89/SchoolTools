@@ -1,11 +1,11 @@
 const TOOL_DEFAULTS = {
   "number-line": {
-    hint: "Ustawienia dla narzedzia: os liczbowa.",
-    title: "Os liczbowa - trening",
+    hint: "Ustawienia dla narzędzia: oś liczbowa.",
+    title: "Oś liczbowa - trening",
   },
   "linear-equations": {
-    hint: "Ustawienia dla narzedzia: rownania liniowe.",
-    title: "Rownania liniowe - trening",
+    hint: "Ustawienia dla narzędzia: równania liniowe.",
+    title: "Równania liniowe - trening",
   },
 };
 
@@ -74,6 +74,7 @@ function collectTeacherFormPayload(formData) {
       settings: {
         difficulty: String(formData.get("difficulty") ?? "easy").trim(),
         taskGroup: String(formData.get("taskGroup") ?? "").trim(),
+        requiredSuccesses: Number(formData.get("requiredSuccesses") ?? 3),
         studentInstructions: String(
           formData.get("studentInstructions") ?? "",
         ).trim(),
@@ -155,14 +156,14 @@ async function handleTeacherSubmit(event) {
 
   if (!payload.classId) {
     renderTeacherFeedback(
-      "Wybierz klase dla tego zadania.",
+      "Wybierz klasę dla tego zadania.",
       "warning",
     );
     return;
   }
 
   try {
-    renderTeacherFeedback("Tworze zadanie i przygotowuje link dla uczniow...");
+    renderTeacherFeedback("Tworzę zadanie i przygotowuję link dla uczniów...");
     const api = window.createAssignmentApiClient({ apiUrl });
     const response = await api.createAssignment(payload);
     const assignmentLink = buildStudentAssignmentLink(
@@ -175,12 +176,12 @@ async function handleTeacherSubmit(event) {
     teacherElements.resultCard.hidden = false;
 
     renderTeacherFeedback(
-      "Gotowe. Link dla uczniow zostal wygenerowany.",
+      "Gotowe. Link dla uczniów został wygenerowany.",
       "success",
     );
   } catch (error) {
     renderTeacherFeedback(
-      `Nie udalo sie utworzyc zadania. ${error.message}`,
+      `Nie udało się utworzyć zadania. ${error.message}`,
       "warning",
     );
   }
@@ -189,10 +190,10 @@ async function handleTeacherSubmit(event) {
 async function handleCopyLink() {
   try {
     await navigator.clipboard.writeText(teacherElements.assignmentLinkOutput.value);
-    renderTeacherFeedback("Link zostal skopiowany do schowka.", "success");
+    renderTeacherFeedback("Link został skopiowany do schowka.", "success");
   } catch (error) {
     renderTeacherFeedback(
-      "Nie udalo sie skopiowac linku. Skopiuj go recznie z pola tekstowego.",
+      "Nie udało się skopiować linku. Skopiuj go ręcznie z pola tekstowego.",
       "warning",
     );
   }
@@ -203,7 +204,7 @@ function populateClassOptions(classes) {
 
   const placeholder = document.createElement("option");
   placeholder.value = "";
-  placeholder.textContent = "Wybierz klase";
+  placeholder.textContent = "Wybierz klasę";
   teacherElements.classSelect.append(placeholder);
 
   classes.forEach((classEntry) => {
@@ -220,9 +221,9 @@ async function loadClasses() {
   if (!apiUrl) {
     teacherElements.apiWarning.hidden = false;
     teacherElements.apiWarning.textContent =
-      "Ustaw adres Apps Script w shared/config.js, aby wczytac klasy z arkusza.";
+      "Ustaw adres Apps Script w shared/config.js, aby wczytać klasy z arkusza.";
     teacherElements.classSelect.innerHTML =
-      '<option value="">Brak polaczenia z arkuszem</option>';
+      '<option value="">Brak połączenia z arkuszem</option>';
     return;
   }
 
@@ -234,9 +235,9 @@ async function loadClasses() {
   } catch (error) {
     teacherElements.apiWarning.hidden = false;
     teacherElements.apiWarning.textContent =
-      `Nie udalo sie wczytac klas z arkusza. ${error.message}`;
+      `Nie udało się wczytać klas z arkusza. ${error.message}`;
     teacherElements.classSelect.innerHTML =
-      '<option value="">Nie udalo sie wczytac klas</option>';
+      '<option value="">Nie udało się wczytać klas</option>';
   }
 }
 

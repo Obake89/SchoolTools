@@ -62,40 +62,40 @@
               data-tool-settings="number-line"
             >
               <div class="grid grid--2">
-              <label class="field">
-                <span>Typ liczb</span>
-                <select id="task-type-select" name="taskType">
-                  <option value="natural">Liczby naturalne</option>
-                  <option value="integer" selected>Liczby całkowite</option>
-                  <option value="commonFraction">Ułamki zwykłe</option>
-                  <option value="decimal">Ułamki dziesiętne</option>
-                  <option value="rational">Liczby wymierne</option>
-                </select>
-              </label>
+                <label class="field">
+                  <span>Typ liczb</span>
+                  <select id="task-type-select" name="taskType">
+                    <option value="natural">Liczby naturalne</option>
+                    <option value="integer" selected>Liczby całkowite</option>
+                    <option value="commonFraction">Ułamki zwykłe</option>
+                    <option value="decimal">Ułamki dziesiętne</option>
+                    <option value="rational">Liczby wymierne</option>
+                  </select>
+                </label>
 
-              <label class="field">
-                <span>Ilość punktów</span>
-                <select id="point-count-select" name="pointCount">
-                  <option value="2">2</option>
-                  <option value="3" selected>3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                </select>
-              </label>
+                <label class="field">
+                  <span>Ilość punktów</span>
+                  <select id="point-count-select" name="pointCount">
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                  </select>
+                </label>
 
-              <label class="field">
-                <span>Ilość poprawnych rund</span>
-                <input
-                  id="required-successes-input"
-                  name="requiredSuccesses"
-                  type="number"
-                  min="1"
-                  max="10"
-                  value="3"
-                />
-              </label>
-            </div>
+                <label class="field">
+                  <span>Ilość poprawnych rund</span>
+                  <input
+                    id="required-successes-input"
+                    name="requiredSuccesses"
+                    type="number"
+                    min="1"
+                    max="20"
+                    value="3"
+                  />
+                </label>
+              </div>
             </section>
 
             <section
@@ -121,6 +121,18 @@
                     name="taskGroup"
                     type="text"
                     placeholder="Na przykład: A"
+                  />
+                </label>
+
+                <label class="field">
+                  <span>Liczba ćwiczeń do wykonania</span>
+                  <input
+                    id="linear-required-successes-input"
+                    name="requiredSuccesses"
+                    type="number"
+                    min="1"
+                    max="20"
+                    value="3"
                   />
                 </label>
               </div>
@@ -182,7 +194,7 @@
               <li>konfiguracja zadania</li>
               <li>klasa i lista uczniów z arkusza klas</li>
               <li>rozpoczęcie pracy przez ucznia</li>
-              <li>zaliczone rundy i ukończenie całego zadania</li>
+              <li>zaliczone ćwiczenia i ukończenie całego zadania</li>
             </ul>
           </section>
         </aside>
