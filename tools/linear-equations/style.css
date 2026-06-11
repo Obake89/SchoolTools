@@ -271,6 +271,21 @@ input {
   grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.95fr);
 }
 
+.stage-grid--build .stage-grid__source {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.stage-grid--build .stage-grid__pool {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.stage-grid--build .stage-grid__builder {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
 .stage-grid__wide {
   grid-column: 1 / -1;
 }
@@ -578,6 +593,13 @@ input {
   .stage-grid--solve,
   .stage-grid--solve .formula-card {
     grid-template-columns: 1fr;
+  }
+
+  .stage-grid--build .stage-grid__source,
+  .stage-grid--build .stage-grid__pool,
+  .stage-grid--build .stage-grid__builder {
+    grid-column: auto;
+    grid-row: auto;
   }
 }
 
