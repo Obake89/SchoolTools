@@ -3,10 +3,20 @@ const TOOL_DEFAULTS = {
     hint: "Ustawienia dla narzędzia: oś liczbowa.",
     title: "Oś liczbowa - trening",
   },
+  "multiplication-game": {
+    hint: "Ustawienia dla narzędzia: tabliczka mnożenia.",
+    title: "Tabliczka mnożenia - rakietowy sprint",
+  },
   "linear-equations": {
     hint: "Ustawienia dla narzędzia: równania liniowe.",
     title: "Równania liniowe - trening",
   },
+};
+
+const TOOL_PATHS = {
+  "number-line": "../tools/number-line/index.html",
+  "multiplication-game": "../tools/multiplication-game/index.html",
+  "linear-equations": "../tools/linear-equations/index.html",
 };
 
 const teacherElements = {
@@ -49,11 +59,7 @@ function getDefaultApiUrl() {
 }
 
 function getStudentToolBaseUrl(tool) {
-  const toolPath =
-    tool === "linear-equations"
-      ? "../tools/linear-equations/index.html"
-      : "../tools/number-line/index.html";
-
+  const toolPath = TOOL_PATHS[tool] || TOOL_PATHS["number-line"];
   return new URL(toolPath, window.location.href).toString();
 }
 
@@ -74,6 +80,21 @@ function collectTeacherFormPayload(formData) {
       settings: {
         difficulty: String(formData.get("difficulty") ?? "easy").trim(),
         taskGroup: String(formData.get("taskGroup") ?? "").trim(),
+        requiredSuccesses: Number(formData.get("requiredSuccesses") ?? 3),
+        studentInstructions: String(
+          formData.get("studentInstructions") ?? "",
+        ).trim(),
+      },
+    };
+  }
+
+  if (tool === "multiplication-game") {
+    return {
+      ...basePayload,
+      settings: {
+        maxFactor: Number(formData.get("maxFactor") ?? 10),
+        questionCount: Number(formData.get("questionCount") ?? 12),
+        timeLimitSeconds: Number(formData.get("timeLimitSeconds") ?? 60),
         requiredSuccesses: Number(formData.get("requiredSuccesses") ?? 3),
         studentInstructions: String(
           formData.get("studentInstructions") ?? "",

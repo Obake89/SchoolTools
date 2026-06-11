@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Panel nauczyciela - SchoolTools</title>
-    <script src="../shared/config.js?v=20260529-1"></script>
-    <script src="../shared/theme.js?v=20260529-1"></script>
-    <script src="../shared/assignment-api.js?v=20260529-1"></script>
+    <script src="../shared/config.js?v=20260611-1"></script>
+    <script src="../shared/theme.js?v=20260611-1"></script>
+    <script src="../shared/assignment-api.js?v=20260611-1"></script>
     <link rel="stylesheet" href="./style.css?v=20260529-1" />
   </head>
   <body>
@@ -40,6 +40,7 @@
                 <span>Narzędzie</span>
                 <select id="tool-select" name="tool">
                   <option value="number-line">Oś liczbowa</option>
+                  <option value="multiplication-game">Tabliczka mnożenia</option>
                   <option value="linear-equations">Równania liniowe</option>
                 </select>
               </label>
@@ -88,6 +89,54 @@
                   <span>Ilość poprawnych rund</span>
                   <input
                     id="required-successes-input"
+                    name="requiredSuccesses"
+                    type="number"
+                    min="1"
+                    max="20"
+                    value="3"
+                  />
+                </label>
+              </div>
+            </section>
+
+            <section
+              id="multiplication-game-settings"
+              class="tool-settings"
+              data-tool-settings="multiplication-game"
+              hidden
+            >
+              <div class="grid grid--2">
+                <label class="field">
+                  <span>Zakres tabliczki</span>
+                  <select id="max-factor-select" name="maxFactor">
+                    <option value="5">do 5</option>
+                    <option value="10" selected>do 10</option>
+                    <option value="12">do 12</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>Liczba przykładów</span>
+                  <select id="question-count-select" name="questionCount">
+                    <option value="8">8</option>
+                    <option value="12" selected>12</option>
+                    <option value="16">16</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>Czas misji</span>
+                  <select id="time-limit-select" name="timeLimitSeconds">
+                    <option value="45">45 s</option>
+                    <option value="60" selected>60 s</option>
+                    <option value="90">90 s</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>Liczba zaliczonych misji</span>
+                  <input
+                    id="multiplication-required-successes-input"
                     name="requiredSuccesses"
                     type="number"
                     min="1"
@@ -200,6 +249,6 @@
         </aside>
       </section>
     </main>
-    <script src="./app.js?v=20260529-1"></script>
+    <script src="./app.js?v=20260611-1"></script>
   </body>
 </html>
