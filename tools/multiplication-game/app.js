@@ -25,6 +25,10 @@ const state = {
   firstTryCorrectCount: 0,
   timeLeft: 60,
   timerId: null,
+  missionStartedAt: 0,
+  missionDeadlineAt: 0,
+  boostLevel: 0,
+  boostTimeoutId: null,
   recentResults: [],
   lastSummary: null,
   currentStudent: "",
@@ -153,6 +157,43 @@ function clampRatio(value) {
   return Math.min(1, Math.max(0, Number(value) || 0));
 }
 
+function getPreciseTimeLeftSeconds() {
+  if (state.missionDeadlineAt > 0) {
+    return Math.max(0, (state.missionDeadlineAt - Date.now()) / 1000);
+  }
+
+  return Math.max(0, Number(state.timeLeft) || 0);
+}
+
+function getTimeRatio() {
+  if (state.timeLimitSeconds <= 0) {
+    return 1;
+  }
+
+  return clampRatio(getPreciseTimeLeftSeconds() / state.timeLimitSeconds);
+}
+
+function clearRocketBoost() {
+  state.boostLevel = 0;
+
+  if (state.boostTimeoutId) {
+    window.clearTimeout(state.boostTimeoutId);
+    state.boostTimeoutId = null;
+  }
+}
+
+function triggerRocketBoost() {
+  clearRocketBoost();
+  state.boostLevel = 1;
+  renderStats();
+
+  state.boostTimeoutId = window.setTimeout(() => {
+    state.boostLevel = 0;
+    state.boostTimeoutId = null;
+    renderStats();
+  }, 520);
+}
+
 function updateAssignmentProgress() {
   if (!isAssignmentMode() || !state.assignmentConfig) {
     return;
@@ -185,10 +226,7 @@ function renderDashboardHeader() {
 function renderStats() {
   const totalQuestions = state.mission?.questions.length || state.questionCount;
   const solvedQuestions = state.questionStates.filter((item) => item.completed).length;
-  const percentLeft =
-    state.timeLimitSeconds > 0
-      ? Math.max(0, (state.timeLeft / state.timeLimitSeconds) * 100)
-      : 0;
+  const percentLeft = getTimeRatio() * 100;
 
   elements.missionProgressValue.textContent =
     `${solvedQuestions} / ${totalQuestions}`;
@@ -198,6 +236,7 @@ function renderStats() {
   elements.timeBarFill.style.width = `${percentLeft}%`;
   elements.bestStreakValue.textContent =
     `Najlepsza seria: ${state.bestStreak}`;
+
   renderRaceScene({
     totalQuestions,
     solvedQuestions,
@@ -211,36 +250,41 @@ function renderRaceScene(context) {
 
   const totalQuestions = Math.max(1, Number(context?.totalQuestions) || 1);
   const solvedQuestions = Math.max(0, Number(context?.solvedQuestions) || 0);
+  const solvedRatio = clampRatio(solvedQuestions / totalQuestions);
+  const timeRatio = getTimeRatio();
+  const elapsedRatio = clampRatio(1 - timeRatio);
   const progressRatio =
     state.missionStatus === "completed"
       ? 1
-      : clampRatio(solvedQuestions / totalQuestions);
-  const timeRatio =
-    state.timeLimitSeconds > 0
-      ? clampRatio(state.timeLeft / state.timeLimitSeconds)
-      : 1;
+      : clampRatio(elapsedRatio * 0.42 + solvedRatio * 0.58);
   const timePressure = clampRatio(1 - timeRatio);
   const urgency =
     timeRatio > 0.55 ? "calm" : timeRatio > 0.25 ? "medium" : "high";
-  const enginePower = clampRatio(0.45 + state.streak * 0.12 + timePressure * 0.5);
+  const enginePower = clampRatio(
+    0.42 + state.streak * 0.08 + timePressure * 0.22 + state.boostLevel * 0.38,
+  );
   const liftOffset =
     state.missionStatus === "failed"
       ? 8
       : state.missionStatus === "completed"
-        ? -8
-        : state.streak >= 4
-          ? -7
-          : state.currentQuestionAttemptCount > 0
-            ? 4
-            : -1;
+        ? -10
+        : state.boostLevel > 0
+          ? -10
+          : state.streak >= 4
+            ? -6
+            : state.currentQuestionAttemptCount > 0
+              ? 4
+              : -2;
   const tiltDeg =
     state.missionStatus === "failed"
       ? 12
       : state.missionStatus === "completed"
-        ? -2
-        : state.currentQuestionAttemptCount > 0
-          ? 2
-          : -6;
+        ? -4
+        : state.boostLevel > 0
+          ? -10
+          : state.currentQuestionAttemptCount > 0
+            ? 2
+            : -4;
 
   elements.raceSceneVisual.dataset.state = state.missionStatus;
   elements.raceSceneVisual.dataset.urgency = urgency;
@@ -291,22 +335,28 @@ function renderRaceScene(context) {
 
   if (state.missionStatus === "running") {
     elements.raceDistanceLabel.textContent =
-      `Rakieta jest na ${progressPercent}% trasy do mety.`;
+      `Rakieta pokonała ${progressPercent}% trasy do mety.`;
 
     if (urgency === "high") {
       elements.raceTimeLabel.textContent =
-        `Zostało ${formatTime(state.timeLeft)}. Meta jest blisko, czas przyspieszyć.`;
+        `Zostało ${formatTime(state.timeLeft)}. Autopilot leci dalej, ale teraz najbardziej pomagają dopalacze z dobrych odpowiedzi.`;
+      return;
+    }
+
+    if (state.boostLevel > 0) {
+      elements.raceTimeLabel.textContent =
+        `Zostało ${formatTime(state.timeLeft)}. Dopalacz z poprawnej odpowiedzi właśnie pchnął rakietę do przodu.`;
       return;
     }
 
     if (state.streak >= 4) {
       elements.raceTimeLabel.textContent =
-        `Zostało ${formatTime(state.timeLeft)}. Świetna seria niesie rakietę do przodu.`;
+        `Zostało ${formatTime(state.timeLeft)}. Świetna seria trzyma rakietę na mocnym ciągu.`;
       return;
     }
 
     elements.raceTimeLabel.textContent =
-      `Zostało ${formatTime(state.timeLeft)}. Każda dobra odpowiedź przesuwa rakietę dalej.`;
+      `Zostało ${formatTime(state.timeLeft)}. Autopilot prowadzi lot, a każda dobra odpowiedź odpala turbo.`;
     return;
   }
 
@@ -464,17 +514,21 @@ function focusAnswerInput() {
 
 function startTimer() {
   stopTimer();
+  state.timeLeft = Math.ceil(getPreciseTimeLeftSeconds());
+
   state.timerId = window.setInterval(() => {
-    state.timeLeft = Math.max(0, state.timeLeft - 1);
+    const preciseTimeLeft = getPreciseTimeLeftSeconds();
+    state.timeLeft = Math.ceil(preciseTimeLeft);
     renderStats();
 
-    if (state.timeLeft === 0) {
+    if (preciseTimeLeft <= 0) {
       handleMissionFailed();
     }
-  }, 1000);
+  }, 160);
 }
 
 function resetMissionState() {
+  clearRocketBoost();
   state.score = 0;
   state.streak = 0;
   state.bestStreak = 0;
@@ -504,6 +558,9 @@ function startMission() {
   stopTimer();
   syncToolbarSelections();
   state.mission = createMission(getCurrentSettings());
+  state.missionStartedAt = Date.now();
+  state.missionDeadlineAt =
+    state.missionStartedAt + state.timeLimitSeconds * 1000;
   state.timeLeft = state.timeLimitSeconds;
   state.missionStatus = "running";
 
@@ -569,7 +626,9 @@ async function submitCompletedAssignmentIfNeeded() {
 
 async function handleMissionCompleted() {
   stopTimer();
+  clearRocketBoost();
   state.missionStatus = "completed";
+  state.timeLeft = Math.ceil(getPreciseTimeLeftSeconds());
   setMissionControlsEnabled(false);
   renderStats();
 
@@ -630,7 +689,9 @@ async function handleMissionCompleted() {
 
 function handleMissionFailed() {
   stopTimer();
+  clearRocketBoost();
   state.missionStatus = "failed";
+  state.timeLeft = 0;
   setMissionControlsEnabled(false);
   renderStats();
 
@@ -698,10 +759,13 @@ async function handleAnswerSubmit(event) {
     });
     renderRecentResults();
     renderQuestionTrack();
-    renderStats();
     renderCurrentQuestion();
 
-    state.timeLeft = Math.max(0, state.timeLeft - getPenaltySeconds());
+    state.missionDeadlineAt = Math.max(
+      Date.now(),
+      state.missionDeadlineAt - getPenaltySeconds() * 1000,
+    );
+    state.timeLeft = Math.ceil(getPreciseTimeLeftSeconds());
     renderStats();
 
     renderFeedback(
@@ -710,7 +774,7 @@ async function handleAnswerSubmit(event) {
       "warning",
     );
 
-    if (state.timeLeft === 0) {
+    if (getPreciseTimeLeftSeconds() <= 0) {
       handleMissionFailed();
       return;
     }
@@ -741,6 +805,7 @@ async function handleAnswerSubmit(event) {
     status: "success",
     points: earnedPoints,
   });
+  triggerRocketBoost();
   renderRecentResults();
   renderStats();
   renderQuestionTrack();

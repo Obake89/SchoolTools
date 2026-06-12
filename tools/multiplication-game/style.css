@@ -419,7 +419,7 @@ button:focus-visible {
 .race-track__fill {
   position: absolute;
   left: 0;
-  right: 62px;
+  right: 46px;
   bottom: 12px;
   height: 16px;
   border-radius: 999px;
@@ -447,8 +447,8 @@ button:focus-visible {
 }
 
 .race-track__fill {
-  width: calc(var(--rocket-progress) * (100% - 62px));
-  max-width: calc(100% - 62px);
+  width: calc(var(--rocket-progress) * (100% - 46px));
+  max-width: calc(100% - 46px);
   right: auto;
   background: linear-gradient(90deg, #34d399 0%, #2dd4bf 58%, #38bdf8 100%);
   box-shadow: 0 0 18px rgba(56, 189, 248, 0.28);
@@ -457,10 +457,10 @@ button:focus-visible {
 
 .race-track__finish {
   position: absolute;
-  right: 8px;
-  bottom: 2px;
-  width: 28px;
-  height: 54px;
+  right: 2px;
+  bottom: -2px;
+  width: 32px;
+  height: 58px;
   border-left: 4px solid #7c2d12;
 }
 
@@ -486,9 +486,9 @@ button:focus-visible {
 
 .rocket-ship {
   position: absolute;
-  left: calc(10px + (100% - 126px) * var(--rocket-progress));
-  bottom: calc(34px + var(--rocket-lift));
-  width: 74px;
+  left: calc(6px + (100% - 96px) * var(--rocket-progress));
+  bottom: calc(33px + var(--rocket-lift));
+  width: 82px;
   height: 40px;
   transform: rotate(var(--rocket-tilt));
   transform-origin: center center;
@@ -501,10 +501,10 @@ button:focus-visible {
 .rocket-ship__body {
   position: absolute;
   top: 8px;
-  left: 12px;
-  width: 42px;
+  left: 16px;
+  width: 48px;
   height: 22px;
-  border-radius: 20px 18px 18px 20px;
+  border-radius: 16px 14px 14px 16px;
   background: linear-gradient(135deg, #fff7ed 0%, #ffffff 48%, #bae6fd 100%);
   border: 2px solid rgba(12, 74, 110, 0.2);
   box-shadow: 0 6px 14px rgba(15, 138, 166, 0.18);
@@ -513,18 +513,30 @@ button:focus-visible {
 .rocket-ship__body::before {
   content: "";
   position: absolute;
-  top: 3px;
-  right: -15px;
-  width: 18px;
-  height: 14px;
+  top: -2px;
+  right: -18px;
+  width: 22px;
+  height: 22px;
   clip-path: polygon(0 50%, 100% 0, 100% 100%);
   background: linear-gradient(135deg, #fb923c 0%, #ef7d00 100%);
+}
+
+.rocket-ship__body::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: -7px;
+  width: 10px;
+  height: 10px;
+  border-radius: 4px;
+  background: #cbd5e1;
+  border: 2px solid rgba(12, 74, 110, 0.14);
 }
 
 .rocket-ship__window {
   position: absolute;
   top: 14px;
-  left: 26px;
+  left: 40px;
   width: 10px;
   height: 10px;
   border-radius: 999px;
@@ -535,32 +547,33 @@ button:focus-visible {
 
 .rocket-ship__wing {
   position: absolute;
-  left: 14px;
-  width: 18px;
+  left: 9px;
+  width: 22px;
   height: 14px;
   background: linear-gradient(135deg, #ef7d00 0%, #f97316 100%);
-  clip-path: polygon(0 50%, 100% 0, 62% 100%);
+  transform-origin: right center;
 }
 
 .rocket-ship__wing--top {
-  top: 0;
+  top: 4px;
+  clip-path: polygon(100% 100%, 0 18%, 88% 10%);
 }
 
 .rocket-ship__wing--bottom {
-  bottom: 0;
-  transform: scaleY(-1);
+  bottom: 4px;
+  clip-path: polygon(100% 0, 0 82%, 88% 90%);
 }
 
 .rocket-ship__flame {
   position: absolute;
   top: 14px;
   left: 0;
-  width: calc(16px + 10px * var(--engine-power));
+  width: calc(18px + 14px * var(--engine-power));
   height: 12px;
   border-radius: 999px 0 0 999px;
   background: linear-gradient(90deg, rgba(251, 146, 60, 0) 0%, #fdba74 24%, #ef4444 100%);
   filter: blur(1px);
-  transform: translateX(-10px);
+  transform: translateX(-14px);
   transform-origin: right center;
   animation: flamePulse 0.28s ease-in-out infinite;
 }
@@ -568,8 +581,8 @@ button:focus-visible {
 .rocket-ship__trail {
   position: absolute;
   top: 17px;
-  left: -64px;
-  width: 56px;
+  left: -76px;
+  width: 68px;
   height: 6px;
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9));
