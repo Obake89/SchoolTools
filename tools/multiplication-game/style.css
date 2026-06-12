@@ -517,7 +517,7 @@ button:focus-visible {
   right: -18px;
   width: 22px;
   height: 22px;
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  clip-path: polygon(100% 0, 0 50%, 100% 100%);
   background: linear-gradient(135deg, #fb923c 0%, #ef7d00 100%);
 }
 
@@ -556,12 +556,12 @@ button:focus-visible {
 
 .rocket-ship__wing--top {
   top: 4px;
-  clip-path: polygon(100% 0, 0 82%, 88% 90%);
+  clip-path: polygon(100% 100%, 0 18%, 88% 10%);
 }
 
 .rocket-ship__wing--bottom {
   bottom: 4px;
-  clip-path: polygon(100% 100%, 0 18%, 88% 10%);
+  clip-path: polygon(100% 0, 0 82%, 88% 90%);
 }
 
 .rocket-ship__flame {
