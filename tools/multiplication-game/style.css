@@ -270,6 +270,347 @@ button:focus-visible {
   font-size: 0.9rem;
 }
 
+.race-scene {
+  display: grid;
+  gap: 10px;
+}
+
+.race-scene__visual {
+  position: relative;
+  min-height: 170px;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(240, 202, 167, 0.84);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 138, 166, 0.2) 0%,
+      rgba(125, 211, 252, 0.32) 42%,
+      rgba(255, 250, 244, 0.94) 100%
+    );
+  --rocket-progress: 0;
+  --rocket-lift: 0px;
+  --rocket-tilt: -6deg;
+  --engine-power: 1;
+  --time-pressure: 0;
+}
+
+.race-scene__visual::before,
+.race-scene__visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.race-scene__visual::before {
+  background:
+    radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.86), transparent 16%),
+    radial-gradient(circle at 80% 22%, rgba(255, 255, 255, 0.55), transparent 18%),
+    radial-gradient(circle at 62% 68%, rgba(255, 255, 255, 0.32), transparent 22%);
+  opacity: 0.95;
+}
+
+.race-scene__visual::after {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(239, 125, 0, 0) 0%,
+      rgba(239, 125, 0, calc(var(--time-pressure) * 0.18)) 45%,
+      rgba(239, 68, 68, calc(var(--time-pressure) * 0.34)) 100%
+    );
+  transition: background 0.25s ease;
+}
+
+.race-scene__star,
+.race-scene__cloud {
+  position: absolute;
+  pointer-events: none;
+}
+
+.race-scene__star {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.75);
+  animation: starTwinkle 2.2s ease-in-out infinite;
+}
+
+.race-scene__star--one {
+  top: 20px;
+  left: 18%;
+}
+
+.race-scene__star--two {
+  top: 34px;
+  left: 62%;
+  animation-delay: 0.7s;
+}
+
+.race-scene__star--three {
+  top: 58px;
+  right: 14%;
+  animation-delay: 1.2s;
+}
+
+.race-scene__cloud {
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  filter: blur(0.3px);
+}
+
+.race-scene__cloud::before,
+.race-scene__cloud::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.race-scene__cloud--one {
+  top: 42px;
+  left: 14px;
+  width: 90px;
+}
+
+.race-scene__cloud--one::before {
+  width: 32px;
+  height: 24px;
+  left: 10px;
+  bottom: 6px;
+}
+
+.race-scene__cloud--one::after {
+  width: 28px;
+  height: 20px;
+  left: 38px;
+  bottom: 10px;
+}
+
+.race-scene__cloud--two {
+  top: 74px;
+  right: 28px;
+  width: 78px;
+}
+
+.race-scene__cloud--two::before {
+  width: 24px;
+  height: 18px;
+  left: 12px;
+  bottom: 6px;
+}
+
+.race-scene__cloud--two::after {
+  width: 30px;
+  height: 20px;
+  left: 34px;
+  bottom: 8px;
+}
+
+.race-track {
+  position: absolute;
+  inset: auto 18px 18px;
+  height: 92px;
+}
+
+.race-track__lane,
+.race-track__fill {
+  position: absolute;
+  left: 0;
+  right: 62px;
+  bottom: 12px;
+  height: 16px;
+  border-radius: 999px;
+}
+
+.race-track__lane {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.92)),
+    rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(240, 202, 167, 0.84);
+  overflow: hidden;
+}
+
+.race-track__lane::after {
+  content: "";
+  position: absolute;
+  inset: 5px 10px;
+  border-radius: 999px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(15, 138, 166, 0.28) 0 18px,
+      rgba(255, 255, 255, 0) 18px 30px
+    );
+}
+
+.race-track__fill {
+  width: calc(var(--rocket-progress) * (100% - 62px));
+  max-width: calc(100% - 62px);
+  right: auto;
+  background: linear-gradient(90deg, #34d399 0%, #2dd4bf 58%, #38bdf8 100%);
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.28);
+  transition: width 0.35s ease;
+}
+
+.race-track__finish {
+  position: absolute;
+  right: 8px;
+  bottom: 2px;
+  width: 28px;
+  height: 54px;
+  border-left: 4px solid #7c2d12;
+}
+
+.finish-flag {
+  position: absolute;
+  left: 0;
+  width: 18px;
+  height: 12px;
+  background:
+    linear-gradient(90deg, #ffffff 0 50%, #f97316 50% 100%);
+  border: 1px solid rgba(124, 45, 18, 0.2);
+}
+
+.finish-flag--top {
+  top: 4px;
+}
+
+.finish-flag--bottom {
+  top: 18px;
+  background:
+    linear-gradient(90deg, #f97316 0 50%, #ffffff 50% 100%);
+}
+
+.rocket-ship {
+  position: absolute;
+  left: calc(10px + (100% - 126px) * var(--rocket-progress));
+  bottom: calc(34px + var(--rocket-lift));
+  width: 74px;
+  height: 40px;
+  transform: rotate(var(--rocket-tilt));
+  transform-origin: center center;
+  transition:
+    left 0.35s ease,
+    bottom 0.35s ease,
+    transform 0.35s ease;
+}
+
+.rocket-ship__body {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  width: 42px;
+  height: 22px;
+  border-radius: 20px 18px 18px 20px;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffffff 48%, #bae6fd 100%);
+  border: 2px solid rgba(12, 74, 110, 0.2);
+  box-shadow: 0 6px 14px rgba(15, 138, 166, 0.18);
+}
+
+.rocket-ship__body::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  right: -15px;
+  width: 18px;
+  height: 14px;
+  clip-path: polygon(0 50%, 100% 0, 100% 100%);
+  background: linear-gradient(135deg, #fb923c 0%, #ef7d00 100%);
+}
+
+.rocket-ship__window {
+  position: absolute;
+  top: 14px;
+  left: 26px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #0ea5e9;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.16);
+}
+
+.rocket-ship__wing {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 14px;
+  background: linear-gradient(135deg, #ef7d00 0%, #f97316 100%);
+  clip-path: polygon(0 50%, 100% 0, 62% 100%);
+}
+
+.rocket-ship__wing--top {
+  top: 0;
+}
+
+.rocket-ship__wing--bottom {
+  bottom: 0;
+  transform: scaleY(-1);
+}
+
+.rocket-ship__flame {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  width: calc(16px + 10px * var(--engine-power));
+  height: 12px;
+  border-radius: 999px 0 0 999px;
+  background: linear-gradient(90deg, rgba(251, 146, 60, 0) 0%, #fdba74 24%, #ef4444 100%);
+  filter: blur(1px);
+  transform: translateX(-10px);
+  transform-origin: right center;
+  animation: flamePulse 0.28s ease-in-out infinite;
+}
+
+.rocket-ship__trail {
+  position: absolute;
+  top: 17px;
+  left: -64px;
+  width: 56px;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9));
+  opacity: calc(0.45 + var(--engine-power) * 0.22);
+  filter: blur(1px);
+}
+
+.race-scene__hud {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.race-scene__label {
+  margin: 0;
+  font-weight: 800;
+  color: var(--accent-strong);
+}
+
+.race-scene__label--muted {
+  color: var(--muted);
+}
+
+.race-scene__visual[data-state="completed"] .rocket-ship {
+  --rocket-lift: -6px;
+  --rocket-tilt: -2deg;
+}
+
+.race-scene__visual[data-state="failed"] .rocket-ship {
+  --rocket-tilt: 12deg;
+}
+
+.race-scene__visual[data-urgency="high"] .rocket-ship__trail {
+  opacity: 0.95;
+}
+
+.race-scene__visual[data-urgency="high"] .race-track__lane {
+  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.15);
+}
+
 .status-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -485,6 +826,30 @@ button:focus-visible {
   gap: 10px;
 }
 
+@keyframes starTwinkle {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes flamePulse {
+  0%,
+  100% {
+    transform: translateX(-10px) scaleX(0.94) scaleY(0.9);
+  }
+
+  50% {
+    transform: translateX(-12px) scaleX(1.08) scaleY(1.08);
+  }
+}
+
 @media (max-width: 1120px) {
   .game-shell {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -542,6 +907,14 @@ button:focus-visible {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .race-scene__hud {
+    flex-direction: column;
+  }
+
+  .race-scene__visual {
+    min-height: 154px;
+  }
+
   .recent-result {
     align-items: flex-start;
     flex-direction: column;
@@ -549,5 +922,18 @@ button:focus-visible {
 
   .recent-result span {
     text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .race-scene__star,
+  .rocket-ship__flame {
+    animation: none;
+  }
+
+  .rocket-ship,
+  .race-track__fill,
+  .timer-bar__fill {
+    transition: none;
   }
 }

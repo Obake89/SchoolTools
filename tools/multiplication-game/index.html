@@ -66,9 +66,9 @@
         <label class="field">
           <span>Zakres tabliczki</span>
           <select id="max-factor-select">
-            <option value="5">do 5</option>
+            <option value="9">do 9</option>
             <option value="10" selected>do 10</option>
-            <option value="12">do 12</option>
+            <option value="15">do 15</option>
           </select>
         </label>
         <label class="field">
@@ -106,6 +106,47 @@
             </div>
             <span id="mission-mode-badge" class="mission-mode-badge">Tryb wolny</span>
           </div>
+
+          <section class="race-scene" aria-label="Tor lotu rakiety">
+            <div
+              id="race-scene-visual"
+              class="race-scene__visual"
+              data-state="idle"
+              data-urgency="calm"
+            >
+              <span class="race-scene__star race-scene__star--one"></span>
+              <span class="race-scene__star race-scene__star--two"></span>
+              <span class="race-scene__star race-scene__star--three"></span>
+              <span class="race-scene__cloud race-scene__cloud--one"></span>
+              <span class="race-scene__cloud race-scene__cloud--two"></span>
+
+              <div class="race-track" aria-hidden="true">
+                <div id="race-progress-fill" class="race-track__fill"></div>
+                <div class="race-track__lane"></div>
+                <div class="race-track__finish">
+                  <span class="finish-flag finish-flag--top"></span>
+                  <span class="finish-flag finish-flag--bottom"></span>
+                </div>
+                <div id="rocket-ship" class="rocket-ship">
+                  <span class="rocket-ship__trail"></span>
+                  <span class="rocket-ship__flame"></span>
+                  <span class="rocket-ship__body"></span>
+                  <span class="rocket-ship__window"></span>
+                  <span class="rocket-ship__wing rocket-ship__wing--top"></span>
+                  <span class="rocket-ship__wing rocket-ship__wing--bottom"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="race-scene__hud">
+              <p id="race-distance-label" class="race-scene__label">
+                Rakieta czeka na start.
+              </p>
+              <p id="race-time-label" class="race-scene__label race-scene__label--muted">
+                Gdy zacznie się misja, lot ruszy razem z postępem.
+              </p>
+            </div>
+          </section>
 
           <div class="status-grid" aria-label="Statystyki misji">
             <section class="status-card">

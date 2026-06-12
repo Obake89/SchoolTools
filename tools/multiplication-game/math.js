@@ -1,6 +1,6 @@
 (function attachMultiplicationGameMath(globalObject) {
   const SETTING_OPTIONS = {
-    maxFactor: [5, 10, 12],
+    maxFactor: [9, 10, 15],
     questionCount: [8, 12, 16],
     timeLimitSeconds: [45, 60, 90],
   };

@@ -58,6 +58,11 @@ const elements = {
   comboValue: document.querySelector("#combo-value"),
   timeValue: document.querySelector("#time-value"),
   timeBarFill: document.querySelector("#time-bar-fill"),
+  raceSceneVisual: document.querySelector("#race-scene-visual"),
+  raceProgressFill: document.querySelector("#race-progress-fill"),
+  rocketShip: document.querySelector("#rocket-ship"),
+  raceDistanceLabel: document.querySelector("#race-distance-label"),
+  raceTimeLabel: document.querySelector("#race-time-label"),
   questionTrack: document.querySelector("#question-track"),
   questionCaption: document.querySelector("#question-caption"),
   questionHint: document.querySelector("#question-hint"),
@@ -144,6 +149,10 @@ function formatTime(seconds) {
   return `${minutes}:${String(remainder).padStart(2, "0")}`;
 }
 
+function clampRatio(value) {
+  return Math.min(1, Math.max(0, Number(value) || 0));
+}
+
 function updateAssignmentProgress() {
   if (!isAssignmentMode() || !state.assignmentConfig) {
     return;
@@ -189,6 +198,121 @@ function renderStats() {
   elements.timeBarFill.style.width = `${percentLeft}%`;
   elements.bestStreakValue.textContent =
     `Najlepsza seria: ${state.bestStreak}`;
+  renderRaceScene({
+    totalQuestions,
+    solvedQuestions,
+  });
+}
+
+function renderRaceScene(context) {
+  if (!elements.raceSceneVisual) {
+    return;
+  }
+
+  const totalQuestions = Math.max(1, Number(context?.totalQuestions) || 1);
+  const solvedQuestions = Math.max(0, Number(context?.solvedQuestions) || 0);
+  const progressRatio =
+    state.missionStatus === "completed"
+      ? 1
+      : clampRatio(solvedQuestions / totalQuestions);
+  const timeRatio =
+    state.timeLimitSeconds > 0
+      ? clampRatio(state.timeLeft / state.timeLimitSeconds)
+      : 1;
+  const timePressure = clampRatio(1 - timeRatio);
+  const urgency =
+    timeRatio > 0.55 ? "calm" : timeRatio > 0.25 ? "medium" : "high";
+  const enginePower = clampRatio(0.45 + state.streak * 0.12 + timePressure * 0.5);
+  const liftOffset =
+    state.missionStatus === "failed"
+      ? 8
+      : state.missionStatus === "completed"
+        ? -8
+        : state.streak >= 4
+          ? -7
+          : state.currentQuestionAttemptCount > 0
+            ? 4
+            : -1;
+  const tiltDeg =
+    state.missionStatus === "failed"
+      ? 12
+      : state.missionStatus === "completed"
+        ? -2
+        : state.currentQuestionAttemptCount > 0
+          ? 2
+          : -6;
+
+  elements.raceSceneVisual.dataset.state = state.missionStatus;
+  elements.raceSceneVisual.dataset.urgency = urgency;
+  elements.raceSceneVisual.style.setProperty(
+    "--rocket-progress",
+    progressRatio.toFixed(3),
+  );
+  elements.raceSceneVisual.style.setProperty(
+    "--rocket-lift",
+    `${liftOffset}px`,
+  );
+  elements.raceSceneVisual.style.setProperty(
+    "--rocket-tilt",
+    `${tiltDeg}deg`,
+  );
+  elements.raceSceneVisual.style.setProperty(
+    "--engine-power",
+    enginePower.toFixed(3),
+  );
+  elements.raceSceneVisual.style.setProperty(
+    "--time-pressure",
+    timePressure.toFixed(3),
+  );
+
+  if (elements.raceProgressFill) {
+    elements.raceProgressFill.style.setProperty(
+      "--rocket-progress",
+      progressRatio.toFixed(3),
+    );
+  }
+
+  const progressPercent = Math.round(progressRatio * 100);
+
+  if (state.missionStatus === "completed") {
+    elements.raceDistanceLabel.textContent = "Rakieta doleciała do mety!";
+    elements.raceTimeLabel.textContent =
+      `Zapas czasu na mecie: ${formatTime(state.timeLeft)}.`;
+    return;
+  }
+
+  if (state.missionStatus === "failed") {
+    elements.raceDistanceLabel.textContent =
+      `Rakieta dotarła do ${progressPercent}% trasy.`;
+    elements.raceTimeLabel.textContent =
+      "Paliwo czasu się skończyło. Jeszcze jedna próba i lecimy dalej.";
+    return;
+  }
+
+  if (state.missionStatus === "running") {
+    elements.raceDistanceLabel.textContent =
+      `Rakieta jest na ${progressPercent}% trasy do mety.`;
+
+    if (urgency === "high") {
+      elements.raceTimeLabel.textContent =
+        `Zostało ${formatTime(state.timeLeft)}. Meta jest blisko, czas przyspieszyć.`;
+      return;
+    }
+
+    if (state.streak >= 4) {
+      elements.raceTimeLabel.textContent =
+        `Zostało ${formatTime(state.timeLeft)}. Świetna seria niesie rakietę do przodu.`;
+      return;
+    }
+
+    elements.raceTimeLabel.textContent =
+      `Zostało ${formatTime(state.timeLeft)}. Każda dobra odpowiedź przesuwa rakietę dalej.`;
+    return;
+  }
+
+  elements.raceDistanceLabel.textContent = "Rakieta czeka na start.";
+  elements.raceTimeLabel.textContent =
+    "Gdy zacznie się misja, lot ruszy razem z postępem.";
 }
 
 function renderQuestionTrack() {
@@ -447,6 +571,7 @@ async function handleMissionCompleted() {
   stopTimer();
   state.missionStatus = "completed";
   setMissionControlsEnabled(false);
+  renderStats();
 
   const summary = createMissionSummary({
     totalQuestions: state.mission.questions.length,
@@ -507,6 +632,7 @@ function handleMissionFailed() {
   stopTimer();
   state.missionStatus = "failed";
   setMissionControlsEnabled(false);
+  renderStats();
 
   const solvedQuestions = state.questionStates.filter((item) => item.completed).length;
   const summary = createMissionSummary({
