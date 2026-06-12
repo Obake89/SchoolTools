@@ -419,7 +419,7 @@ button:focus-visible {
 .race-track__fill {
   position: absolute;
   left: 0;
-  right: 46px;
+  right: 32px;
   bottom: 12px;
   height: 16px;
   border-radius: 999px;
@@ -447,8 +447,8 @@ button:focus-visible {
 }
 
 .race-track__fill {
-  width: calc(var(--rocket-progress) * (100% - 46px));
-  max-width: calc(100% - 46px);
+  width: calc(var(--rocket-progress) * (100% - 32px));
+  max-width: calc(100% - 32px);
   right: auto;
   background: linear-gradient(90deg, #34d399 0%, #2dd4bf 58%, #38bdf8 100%);
   box-shadow: 0 0 18px rgba(56, 189, 248, 0.28);
@@ -457,9 +457,9 @@ button:focus-visible {
 
 .race-track__finish {
   position: absolute;
-  right: 2px;
-  bottom: -2px;
-  width: 32px;
+  right: 10px;
+  bottom: 8px;
+  width: 24px;
   height: 58px;
   border-left: 4px solid #7c2d12;
 }
@@ -517,7 +517,7 @@ button:focus-visible {
   right: -18px;
   width: 22px;
   height: 22px;
-  clip-path: polygon(0 50%, 100% 0, 100% 100%);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
   background: linear-gradient(135deg, #fb923c 0%, #ef7d00 100%);
 }
 
@@ -556,12 +556,12 @@ button:focus-visible {
 
 .rocket-ship__wing--top {
   top: 4px;
-  clip-path: polygon(100% 100%, 0 18%, 88% 10%);
+  clip-path: polygon(100% 0, 0 82%, 88% 90%);
 }
 
 .rocket-ship__wing--bottom {
   bottom: 4px;
-  clip-path: polygon(100% 0, 0 82%, 88% 90%);
+  clip-path: polygon(100% 100%, 0 18%, 88% 10%);
 }
 
 .rocket-ship__flame {
@@ -614,6 +614,11 @@ button:focus-visible {
 
 .race-scene__visual[data-state="failed"] .rocket-ship {
   --rocket-tilt: 12deg;
+}
+
+.race-scene__visual[data-state="failed"] .rocket-ship__flame,
+.race-scene__visual[data-state="failed"] .rocket-ship__trail {
+  opacity: 0;
 }
 
 .race-scene__visual[data-urgency="high"] .rocket-ship__trail {

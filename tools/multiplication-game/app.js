@@ -261,11 +261,13 @@ function renderRaceScene(context) {
   const urgency =
     timeRatio > 0.55 ? "calm" : timeRatio > 0.25 ? "medium" : "high";
   const enginePower = clampRatio(
-    0.42 + state.streak * 0.08 + timePressure * 0.22 + state.boostLevel * 0.38,
+    state.missionStatus === "failed"
+      ? 0
+      : 0.42 + state.streak * 0.08 + timePressure * 0.22 + state.boostLevel * 0.38,
   );
   const liftOffset =
     state.missionStatus === "failed"
-      ? 8
+      ? -16
       : state.missionStatus === "completed"
         ? -10
         : state.boostLevel > 0
@@ -277,7 +279,7 @@ function renderRaceScene(context) {
               : -2;
   const tiltDeg =
     state.missionStatus === "failed"
-      ? 12
+      ? 16
       : state.missionStatus === "completed"
         ? -4
         : state.boostLevel > 0
