@@ -457,8 +457,8 @@ button:focus-visible {
 
 .race-track__finish {
   position: absolute;
-  right: 10px;
-  bottom: 8px;
+  right: 17px;
+  bottom: 25px;
   width: 24px;
   height: 58px;
   border-left: 4px solid #7c2d12;
@@ -513,10 +513,11 @@ button:focus-visible {
 .rocket-ship__body::before {
   content: "";
   position: absolute;
-  top: -2px;
-  right: -18px;
-  width: 22px;
-  height: 22px;
+  scale:-1;
+  top: 0px;
+  right: -17px;
+  width: 20px;
+  height: 18px;
   clip-path: polygon(100% 0, 0 50%, 100% 100%);
   background: linear-gradient(135deg, #fb923c 0%, #ef7d00 100%);
 }
@@ -547,20 +548,22 @@ button:focus-visible {
 
 .rocket-ship__wing {
   position: absolute;
-  left: 9px;
-  width: 22px;
-  height: 14px;
+  left: 4px;
+  width: 16px;
+  height: 10px;
   background: linear-gradient(135deg, #ef7d00 0%, #f97316 100%);
   transform-origin: right center;
 }
 
 .rocket-ship__wing--top {
-  top: 4px;
+  top: 3px;
+  scale: -1;
   clip-path: polygon(100% 100%, 0 18%, 88% 10%);
 }
 
 .rocket-ship__wing--bottom {
-  bottom: 4px;
+  bottom: 3px;
+  scale: -1;
   clip-path: polygon(100% 0, 0 82%, 88% 90%);
 }
 
@@ -582,7 +585,7 @@ button:focus-visible {
   position: absolute;
   top: 17px;
   left: -76px;
-  width: 68px;
+  width: calc(68px*var(--engine-power));
   height: 6px;
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9));
