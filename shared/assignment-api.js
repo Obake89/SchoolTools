@@ -63,6 +63,16 @@ function createAssignmentApiClient(options) {
         "GET",
       );
     },
+    getSpaceQuizFilters(grade = "") {
+      return request("getSpaceQuizFilters", { grade }, "GET");
+    },
+    getSpaceQuizQuestions(grade, topic, count) {
+      return request(
+        "getSpaceQuizQuestions",
+        { grade, topic, count },
+        "GET",
+      );
+    },
     getAssignment(assignmentId) {
       return request("getAssignment", { assignmentId }, "GET");
     },

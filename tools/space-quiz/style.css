@@ -1,0 +1,627 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f8fb;
+  --panel: rgba(255, 255, 255, 0.94);
+  --panel-soft: #f7fbff;
+  --text: #162032;
+  --muted: #5d6a7e;
+  --border: #ccdae8;
+  --accent: #0f8a83;
+  --accent-strong: #0b6f69;
+  --accent-soft: #d8f4f1;
+  --danger: #be123c;
+  --danger-soft: #ffe4e6;
+  --success: #157347;
+  --success-soft: #dcfce7;
+  --warning: #a16207;
+  --warning-soft: #fef3c7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.96), rgba(214, 245, 241, 0.82) 34%, rgba(236, 246, 255, 0.9) 70%),
+    var(--app-page-background, var(--bg));
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px 16px 40px;
+}
+
+.page__header,
+.toolbar,
+.assignment-panel,
+.flight-panel,
+.question-panel,
+.summary-panel,
+.feedback {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 16px 32px rgba(22, 32, 50, 0.08);
+}
+
+.page__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 22px;
+}
+
+.page__eyebrow,
+.assignment-panel__eyebrow,
+.flight-panel__eyebrow,
+.summary-panel__eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent-strong);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+.page__header h1,
+.assignment-panel__header h2,
+.flight-panel h2,
+.summary-panel h3 {
+  margin-bottom: 0;
+}
+
+.page__header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.page__lead,
+.assignment-panel__text,
+.summary-panel__text,
+.question-topic {
+  margin-bottom: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.page__back {
+  flex-shrink: 0;
+  align-self: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.assignment-panel,
+.toolbar {
+  margin-top: 18px;
+  padding: 18px;
+}
+
+.assignment-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.assignment-panel__header,
+.student-setup,
+.toolbar,
+.flight-panel__top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: end;
+  justify-content: space-between;
+}
+
+.student-setup .field {
+  flex: 1 1 280px;
+}
+
+.assignment-progress {
+  display: grid;
+  gap: 6px;
+  min-width: 128px;
+  padding: 12px 14px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.assignment-progress span,
+.status-card__label,
+.summary-stat span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  min-width: 160px;
+}
+
+.field span {
+  font-weight: 800;
+}
+
+input,
+select,
+button {
+  min-height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 0 12px;
+  background: #ffffff;
+}
+
+button {
+  padding: 0 16px;
+  background: linear-gradient(135deg, var(--accent), #0ea5a4);
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+button:hover,
+button:focus-visible {
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+.game-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 18px;
+  margin-top: 18px;
+  align-items: start;
+}
+
+.flight-panel,
+.question-panel {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.mission-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 800;
+  border: 1px solid rgba(15, 138, 131, 0.22);
+}
+
+.space-scene__visual {
+  position: relative;
+  min-height: 280px;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid #21475c;
+  background:
+    linear-gradient(90deg, rgba(10, 20, 38, 0.95), rgba(16, 58, 80, 0.9)),
+    #0b1020;
+  --impact-progress: 0;
+  --meteor-image: url("./Images/meteor-1.png");
+}
+
+.space-scene__visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.9) 0 2px, transparent 3px),
+    radial-gradient(circle at 48% 34%, rgba(255, 255, 255, 0.7) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 24%, rgba(255, 255, 255, 0.9) 0 2px, transparent 3px),
+    radial-gradient(circle at 64% 74%, rgba(255, 255, 255, 0.6) 0 1px, transparent 2px);
+  opacity: 0.82;
+}
+
+.star {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.85);
+  animation: starPulse 2.2s ease-in-out infinite;
+}
+
+.star--one {
+  left: 24%;
+  top: 26%;
+}
+
+.star--two {
+  left: 54%;
+  top: 16%;
+  animation-delay: 0.4s;
+}
+
+.star--three {
+  left: 82%;
+  top: 64%;
+  animation-delay: 0.8s;
+}
+
+.star--four {
+  left: 38%;
+  top: 72%;
+  animation-delay: 1.2s;
+}
+
+.ship,
+.meteor,
+.projectile {
+  position: absolute;
+  z-index: 2;
+}
+
+.ship {
+  left: 9%;
+  top: 50%;
+  width: 104px;
+  height: 62px;
+  transform: translateY(-50%);
+  transition: transform 0.34s ease;
+}
+
+.ship__sprite {
+  display: block;
+    width: 100%;
+  height: 100%;
+  background:
+    url("./Images/ship.png") center / contain no-repeat,
+    linear-gradient(90deg, #dbeafe 0 56%, #f97316 57% 100%);
+  clip-path: polygon(0 35%, 66% 35%, 82% 0, 100% 50%, 82% 100%, 66% 65%, 0 65%);
+  filter: drop-shadow(0 9px 12px rgba(0, 0, 0, 0.32));
+}
+
+.meteor {
+  right: 12%;
+  top: 50%;
+  width: 74px;
+  height: 74px;
+  transform: translateY(-50%);
+  background:
+    var(--meteor-image) center / contain no-repeat,
+    radial-gradient(circle at 32% 30%, #f6ad55, #8b3a16 62%, #4a1d0b);
+  border-radius: 44% 56% 48% 52%;
+  box-shadow: 0 0 28px rgba(251, 146, 60, 0.28);
+}
+
+.projectile {
+  left: 20%;
+  top: 50%;
+  width: 26px;
+  height: 8px;
+  opacity: 0;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background:
+    url("./Images/projectile.png") center / contain no-repeat,
+    linear-gradient(90deg, #a7f3d0, #22d3ee, #ffffff);
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.9);
+}
+
+.space-scene__visual[data-state="running"] .meteor {
+  right: calc(12% + (61% * var(--impact-progress)));
+}
+
+.space-scene__visual[data-action="dodge-up"] .ship {
+  transform: translateY(calc(-50% - 72px)) rotate(-10deg);
+}
+
+.space-scene__visual[data-action="dodge-down"] .ship {
+  transform: translateY(calc(-50% + 72px)) rotate(10deg);
+}
+
+.space-scene__visual[data-action="dodge-up"] .meteor,
+.space-scene__visual[data-action="dodge-down"] .meteor {
+  animation: meteorPass 0.62s ease-in forwards;
+}
+
+.space-scene__visual[data-action="shoot"] .projectile {
+  animation: projectileShot 0.62s ease-out forwards;
+}
+
+.space-scene__visual[data-action="shoot"] .meteor {
+  animation: meteorBreak 0.62s ease-out forwards;
+}
+
+.space-scene__visual[data-action="collision"] .ship {
+  transform: translateY(-50%) rotate(18deg) scale(0.92);
+}
+
+.space-scene__visual[data-action="collision"] .meteor {
+  right: 70%;
+}
+
+.space-scene__visual[data-state="completed"] .ship {
+  transform: translate(46vw, -50%) rotate(-6deg);
+}
+
+.status-grid,
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.status-card,
+.summary-stat {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.status-card strong,
+.summary-stat strong {
+  font-size: 1.35rem;
+}
+
+.impact-bar {
+  height: 14px;
+  background: #e2e8f0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.impact-bar__fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #eab308 55%, #ef4444);
+}
+
+.feedback {
+  padding: 13px 15px;
+  line-height: 1.5;
+}
+
+.feedback[data-status="success"] {
+  background: var(--success-soft);
+  border-color: #86efac;
+  color: var(--success);
+}
+
+.feedback[data-status="warning"] {
+  background: var(--warning-soft);
+  border-color: #fcd34d;
+  color: var(--warning);
+}
+
+.question-panel__header {
+  display: grid;
+  gap: 4px;
+}
+
+.question-caption {
+  margin-bottom: 0;
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+
+.question-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-soft);
+}
+
+.question-card h3 {
+  margin-bottom: 0;
+  font-size: clamp(1.45rem, 3vw, 2.05rem);
+  line-height: 1.25;
+}
+
+.answer-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.answer-button {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-height: 58px;
+  padding: 10px 14px;
+  text-align: left;
+  background: #ffffff;
+  color: var(--text);
+}
+
+.answer-button:hover,
+.answer-button:focus-visible {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.answer-button span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.answer-button strong {
+  overflow-wrap: anywhere;
+}
+
+.summary-panel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.summary-panel button {
+  width: max-content;
+}
+
+@keyframes starPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes projectileShot {
+  0% {
+    opacity: 0;
+    transform: translate(0, -50%) scaleX(0.7);
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(55vw, -50%) scaleX(1.5);
+  }
+}
+
+@keyframes meteorBreak {
+  0% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) scale(1.8) rotate(22deg);
+  }
+}
+
+@keyframes meteorPass {
+  0% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-55vw, -50%) scale(0.92) rotate(-28deg);
+  }
+}
+
+@media (max-width: 900px) {
+  .game-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .space-scene__visual {
+    min-height: 240px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding-inline: 12px;
+  }
+
+  .page__header,
+  .assignment-panel,
+  .toolbar,
+  .flight-panel,
+  .question-panel {
+    padding: 15px;
+  }
+
+  .page__header,
+  .toolbar,
+  .student-setup {
+    flex-direction: column;
+  }
+
+  .field,
+  .page__back,
+  button {
+    width: 100%;
+  }
+
+  .space-scene__visual {
+    min-height: 210px;
+  }
+
+  .ship {
+    width: 82px;
+    height: 50px;
+  }
+
+  .meteor {
+    width: 58px;
+    height: 58px;
+  }
+
+  .answer-button {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .summary-panel button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star,
+  .projectile,
+  .meteor {
+    animation: none !important;
+  }
+
+  .ship {
+    transition: none;
+  }
+}

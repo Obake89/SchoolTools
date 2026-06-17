@@ -29,6 +29,7 @@ Po wdrożeniu skopiuj adres `.../exec` i wklej go w panelu nauczyciela.
 - `students`
 - `attempts`
 - `linear-equations-tasks`
+- `space-quiz-questions`
 
 W nowej wersji zakładka `assignments` zapisuje:
 
@@ -61,7 +62,31 @@ Panel nauczyciela pokaże dostępne klasy na podstawie tej zakładki.
 - tworzenie zadania dla wybranej klasy,
 - listę uczniów przypisaną do zadania na podstawie klasy,
 - pobieranie konfiguracji przez link ucznia,
+- pobieranie pytań do kosmicznego quizu po klasie i dziale,
 - zapis tylko ukończonych zadań w `attempts`.
+
+## Zakładka `space-quiz-questions`
+
+W tej zakładce przygotowujesz pytania A/B/C do kosmicznego quizu.
+
+Układ kolumn:
+
+```text
+questionId | grade | topic | question | answerA | answerB | answerC | correctAnswer | explanation
+```
+
+Przykład:
+
+```text
+u-4-01 | 4 | Ułamki | Ile to jest 1/4 + 2/4? | 2/8 | 3/4 | 1/2 | B | Dodajemy liczniki, mianownik zostaje ten sam.
+```
+
+Ważne:
+
+- `grade` wpisz jako `4`, `5`, `6`, `7` albo `8`,
+- `topic` musi być taki sam jak dział wybrany w panelu nauczyciela,
+- `correctAnswer` to jedna litera: `A`, `B` albo `C`,
+- gra losuje wybraną liczbę pytań z pasujących wierszy.
 
 ## Zakładka `linear-equations-tasks`
 

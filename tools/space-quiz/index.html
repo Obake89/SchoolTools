@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kosmiczny quiz - SchoolTools</title>
+    <script src="../../shared/config.js?v=20260617-1"></script>
+    <script src="../../shared/theme.js?v=20260617-1"></script>
+    <script src="../../shared/assignment-api.js?v=20260617-1"></script>
+    <link rel="stylesheet" href="./style.css?v=20260617-1" />
+  </head>
+  <body>
+    <main class="page">
+      <header id="page-header" class="page__header">
+        <div>
+          <p class="page__eyebrow" data-brand-name>SchoolTools</p>
+          <h1>Kosmiczny quiz</h1>
+          <p class="page__lead">
+            Odpowiadaj na pytania A, B albo C, zanim meteoryt doleci do statku.
+          </p>
+        </div>
+        <a class="page__back" href="../../index.html">Powrót do listy narzędzi</a>
+      </header>
+
+      <section
+        id="assignment-panel"
+        class="assignment-panel"
+        aria-label="Informacje o zadaniu"
+        hidden
+      >
+        <div class="assignment-panel__header">
+          <div>
+            <p class="assignment-panel__eyebrow">Tryb zadania</p>
+            <h2 id="assignment-title">Zadanie nauczyciela</h2>
+            <p id="assignment-description" class="assignment-panel__text"></p>
+          </div>
+          <div class="assignment-progress">
+            <span>Postęp</span>
+            <strong id="assignment-progress-value">0 / 0</strong>
+          </div>
+        </div>
+
+        <section id="student-setup" class="student-setup">
+          <label class="field">
+            <span>Wybierz swoje imię i nazwisko</span>
+            <select id="student-select">
+              <option value="">Wybierz ucznia</option>
+            </select>
+          </label>
+          <button id="start-assignment-button" type="button">
+            Rozpocznij zadanie
+          </button>
+        </section>
+
+        <output id="assignment-feedback" class="feedback" aria-live="polite">
+          Trwa wczytywanie ustawień zadania.
+        </output>
+      </section>
+
+      <section id="toolbar" class="toolbar" aria-label="Ustawienia kosmicznego quizu">
+        <label class="field">
+          <span>Klasa pytań</span>
+          <select id="grade-select">
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Dział</span>
+          <select id="topic-input">
+            <option value="Trening">Trening</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Liczba pytań</span>
+          <select id="question-count-select">
+            <option value="5">5</option>
+            <option value="8" selected>8</option>
+            <option value="10">10</option>
+            <option value="12">12</option>
+            <option value="15">15</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Czas na meteoryt</span>
+          <select id="seconds-select">
+            <option value="5">5 s</option>
+            <option value="7" selected>7 s</option>
+            <option value="9">9 s</option>
+            <option value="12">12 s</option>
+          </select>
+        </label>
+        <button id="new-mission-button" type="button">Nowy lot</button>
+      </section>
+
+      <section id="game-shell" class="game-shell" aria-label="Kosmiczny quiz" hidden>
+        <article class="flight-panel">
+          <div class="flight-panel__top">
+            <div>
+              <p id="mission-status-label" class="flight-panel__eyebrow">
+                Trening swobodny
+              </p>
+              <h2>Lot przez pas meteorytów</h2>
+            </div>
+            <span id="mission-mode-badge" class="mission-mode-badge">Tryb wolny</span>
+          </div>
+
+          <section class="space-scene" aria-label="Scena lotu">
+            <div id="space-scene-visual" class="space-scene__visual" data-state="idle">
+              <span class="star star--one"></span>
+              <span class="star star--two"></span>
+              <span class="star star--three"></span>
+              <span class="star star--four"></span>
+              <div id="ship" class="ship" aria-hidden="true">
+                <span class="ship__sprite"></span>
+              </div>
+              <div id="projectile" class="projectile" aria-hidden="true"></div>
+              <div id="meteor" class="meteor" aria-hidden="true"></div>
+            </div>
+          </section>
+
+          <div class="status-grid" aria-label="Statystyki lotu">
+            <section class="status-card">
+              <span class="status-card__label">Pytania</span>
+              <strong id="mission-progress-value">0 / 0</strong>
+            </section>
+            <section class="status-card">
+              <span class="status-card__label">Punkty</span>
+              <strong id="score-value">0</strong>
+            </section>
+            <section class="status-card">
+              <span class="status-card__label">Seria</span>
+              <strong id="streak-value">0</strong>
+            </section>
+            <section class="status-card">
+              <span class="status-card__label">Do zderzenia</span>
+              <strong id="time-value">0.0 s</strong>
+            </section>
+          </div>
+
+          <div class="impact-bar" aria-hidden="true">
+            <div id="impact-bar-fill" class="impact-bar__fill"></div>
+          </div>
+
+          <output id="mission-feedback" class="feedback" aria-live="polite">
+            Wybierz odpowiedź, zanim meteoryt doleci do statku.
+          </output>
+        </article>
+
+        <article class="question-panel">
+          <div class="question-panel__header">
+            <p id="question-caption" class="question-caption">Pytanie 1 z 8</p>
+            <p id="question-topic" class="question-topic">Dział: Trening</p>
+          </div>
+
+          <section class="question-card" aria-label="Pytanie">
+            <h3 id="question-text">Gotowy do startu?</h3>
+            <div id="answer-grid" class="answer-grid"></div>
+          </section>
+
+          <aside id="summary-panel" class="summary-panel" hidden>
+            <p class="summary-panel__eyebrow">Podsumowanie lotu</p>
+            <h3 id="summary-title">Gotowe</h3>
+            <p id="summary-text" class="summary-panel__text"></p>
+            <div class="summary-stats">
+              <section class="summary-stat">
+                <span>Punkty</span>
+                <strong id="summary-score-value">0</strong>
+              </section>
+              <section class="summary-stat">
+                <span>Skuteczność</span>
+                <strong id="summary-accuracy-value">0%</strong>
+              </section>
+            </div>
+            <button id="summary-action-button" type="button">Spróbuj jeszcze raz</button>
+          </aside>
+        </article>
+      </section>
+    </main>
+
+    <script src="./math.js?v=20260617-1"></script>
+    <script src="./app.js?v=20260617-1"></script>
+  </body>
+</html>

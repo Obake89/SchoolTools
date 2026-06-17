@@ -7,6 +7,10 @@ const TOOL_DEFAULTS = {
     hint: "Ustawienia dla narzędzia: tabliczka mnożenia.",
     title: "Tabliczka mnożenia - rakietowy sprint",
   },
+  "space-quiz": {
+    hint: "Ustawienia dla narzędzia: kosmiczny quiz z pytaniami A/B/C.",
+    title: "Kosmiczny quiz - lot bez zderzenia",
+  },
   "linear-equations": {
     hint: "Ustawienia dla narzędzia: równania liniowe.",
     title: "Równania liniowe - trening",
@@ -16,6 +20,7 @@ const TOOL_DEFAULTS = {
 const TOOL_PATHS = {
   "number-line": "../tools/number-line/index.html",
   "multiplication-game": "../tools/multiplication-game/index.html",
+  "space-quiz": "../tools/space-quiz/index.html",
   "linear-equations": "../tools/linear-equations/index.html",
 };
 
@@ -103,6 +108,21 @@ function collectTeacherFormPayload(formData) {
     };
   }
 
+  if (tool === "space-quiz") {
+    return {
+      ...basePayload,
+      settings: {
+        grade: String(formData.get("quizGrade") ?? "4").trim(),
+        topic: String(formData.get("quizTopic") ?? "Trening").trim(),
+        questionCount: Number(formData.get("quizQuestionCount") ?? 8),
+        secondsPerQuestion: Number(formData.get("secondsPerQuestion") ?? 7),
+        studentInstructions: String(
+          formData.get("studentInstructions") ?? "",
+        ).trim(),
+      },
+    };
+  }
+
   return {
     ...basePayload,
     settings: {
@@ -156,6 +176,10 @@ function renderToolSettings() {
 
   if (shouldUseDefaultTitle(teacherElements.assignmentTitleInput.value)) {
     teacherElements.assignmentTitleInput.value = toolMeta.title;
+  }
+
+  if (selectedTool === "space-quiz") {
+    loadSpaceQuizTopics();
   }
 }
 
@@ -262,13 +286,63 @@ async function loadClasses() {
   }
 }
 
+async function loadSpaceQuizTopics() {
+  const gradeSelect = document.querySelector("#quiz-grade-select");
+  const topicSelect = document.querySelector("#quiz-topic-input");
+  const apiUrl = getDefaultApiUrl();
+
+  if (!topicSelect) {
+    return;
+  }
+
+  const previousTopic = topicSelect.value;
+  const grade = gradeSelect?.value || "";
+
+  topicSelect.innerHTML = "";
+
+  if (!apiUrl) {
+    appendTopicOption(topicSelect, "Trening");
+    return;
+  }
+
+  try {
+    const api = window.createAssignmentApiClient({ apiUrl });
+    const response = await api.getSpaceQuizFilters(grade);
+    const topics = response.topics || [];
+
+    if (!topics.length) {
+      appendTopicOption(topicSelect, "Brak działów w arkuszu", "");
+      return;
+    }
+
+    topics.forEach((topic) => appendTopicOption(topicSelect, topic));
+
+    if (topics.includes(previousTopic)) {
+      topicSelect.value = previousTopic;
+    }
+  } catch (error) {
+    appendTopicOption(topicSelect, "Trening");
+  }
+}
+
+function appendTopicOption(select, label, value = label) {
+  const option = document.createElement("option");
+  option.value = value;
+  option.textContent = label;
+  select.append(option);
+}
+
 function initializeTeacherPanel() {
   applyTeacherBrandName();
   teacherElements.form.addEventListener("submit", handleTeacherSubmit);
   teacherElements.toolSelect.addEventListener("change", renderToolSettings);
+  document
+    .querySelector("#quiz-grade-select")
+    ?.addEventListener("change", loadSpaceQuizTopics);
   teacherElements.copyLinkButton.addEventListener("click", handleCopyLink);
   renderToolSettings();
   loadClasses();
+  loadSpaceQuizTopics();
 }
 
 initializeTeacherPanel();

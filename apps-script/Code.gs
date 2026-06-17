@@ -4,6 +4,7 @@ const SHEET_NAMES = {
   students: "students",
   attempts: "attempts",
   linearEquationTasks: "linear-equations-tasks",
+  spaceQuizQuestions: "space-quiz-questions",
 };
 
 function doGet(event) {
@@ -42,6 +43,18 @@ function handleGetRequest(parameters) {
 
   if (action === "getLinearEquationTask") {
     return getLinearEquationTaskResponse(parameters.difficulty, parameters.group);
+  }
+
+  if (action === "getSpaceQuizFilters") {
+    return getSpaceQuizFiltersResponse(parameters.grade);
+  }
+
+  if (action === "getSpaceQuizQuestions") {
+    return getSpaceQuizQuestionsResponse(
+      parameters.grade,
+      parameters.topic,
+      parameters.count,
+    );
   }
 
   throw new Error("Nieobsługiwana akcja GET.");
@@ -280,6 +293,113 @@ function getLinearEquationTaskResponse(difficulty, group) {
   };
 }
 
+function getSpaceQuizFiltersResponse(grade) {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const questionsSheet = getOrCreateSheet_(
+    spreadsheet,
+    SHEET_NAMES.spaceQuizQuestions,
+    [
+      "questionId",
+      "grade",
+      "topic",
+      "question",
+      "answerA",
+      "answerB",
+      "answerC",
+      "correctAnswer",
+      "explanation",
+    ],
+  );
+  const rows = questionsSheet.getDataRange().getValues().slice(1);
+  const normalizedGrade = String(grade || "").trim().toLowerCase();
+  const gradeSet = new Set();
+  const topicSet = new Set();
+
+  rows.forEach(function collectFilter(row) {
+    const rowGrade = String(row[1] || "").trim();
+    const topic = String(row[2] || "").trim();
+
+    if (rowGrade) {
+      gradeSet.add(rowGrade);
+    }
+
+    if (
+      topic &&
+      (!normalizedGrade || rowGrade.toLowerCase() === normalizedGrade)
+    ) {
+      topicSet.add(topic);
+    }
+  });
+
+  return {
+    ok: true,
+    grades: Array.from(gradeSet).sort(),
+    topics: Array.from(topicSet).sort(function sortTopics(left, right) {
+      return left.localeCompare(right);
+    }),
+  };
+}
+
+function getSpaceQuizQuestionsResponse(grade, topic, count) {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const questionsSheet = getOrCreateSheet_(
+    spreadsheet,
+    SHEET_NAMES.spaceQuizQuestions,
+    [
+      "questionId",
+      "grade",
+      "topic",
+      "question",
+      "answerA",
+      "answerB",
+      "answerC",
+      "correctAnswer",
+      "explanation",
+    ],
+  );
+  const normalizedGrade = String(grade || "").trim().toLowerCase();
+  const normalizedTopic = String(topic || "").trim().toLowerCase();
+  const questionLimit = Math.max(1, Math.min(30, Number(count || 8)));
+  const rows = questionsSheet.getDataRange().getValues().slice(1);
+  const filteredRows = rows.filter(function filterQuestion(row) {
+    const rowGrade = String(row[1] || "").trim().toLowerCase();
+    const rowTopic = String(row[2] || "").trim().toLowerCase();
+    const questionText = String(row[3] || "").trim();
+    const correctAnswer = String(row[7] || "").trim().toUpperCase();
+
+    if (!questionText || !row[4] || !row[5] || !row[6]) {
+      return false;
+    }
+
+    if (!["A", "B", "C"].includes(correctAnswer)) {
+      return false;
+    }
+
+    if (normalizedGrade && rowGrade !== normalizedGrade) {
+      return false;
+    }
+
+    if (normalizedTopic && rowTopic !== normalizedTopic) {
+      return false;
+    }
+
+    return true;
+  });
+
+  if (!filteredRows.length) {
+    throw new Error(
+      "Nie znaleziono pytań w zakładce space-quiz-questions dla wybranej klasy i działu.",
+    );
+  }
+
+  return {
+    ok: true,
+    questions: shuffleRows_(filteredRows)
+      .slice(0, questionLimit)
+      .map(normalizeSpaceQuizQuestionRow_),
+  };
+}
+
 function startAssignment(payload) {
   return {
     ok: true,
@@ -318,6 +438,9 @@ function appendAttemptRow_(payload, details) {
       "readingCorrect",
       "completedRounds",
       "completed",
+      "score",
+      "accuracyPercent",
+      "detailsJson",
     ],
   );
 
@@ -333,6 +456,9 @@ function appendAttemptRow_(payload, details) {
     payload.readingCorrect ? "TRUE" : "FALSE",
     Number(details.completedRounds || 0),
     details.completed ? "TRUE" : "FALSE",
+    Number(payload.score || 0),
+    Number(payload.accuracyPercent || 0),
+    JSON.stringify(payload.details || {}),
   ]);
 
   return {
@@ -470,6 +596,44 @@ function normalizeLinearEquationTaskRow_(row) {
     tilePool: String(row[7] || "").trim(),
     instructions: String(row[8] || "").trim(),
   };
+}
+
+function normalizeSpaceQuizQuestionRow_(row) {
+  return {
+    id: String(row[0] || "").trim(),
+    grade: String(row[1] || "").trim(),
+    topic: String(row[2] || "").trim(),
+    prompt: String(row[3] || "").trim(),
+    answers: [
+      {
+        key: "A",
+        label: String(row[4] || "").trim(),
+      },
+      {
+        key: "B",
+        label: String(row[5] || "").trim(),
+      },
+      {
+        key: "C",
+        label: String(row[6] || "").trim(),
+      },
+    ],
+    correctKey: String(row[7] || "").trim().toUpperCase(),
+    explanation: String(row[8] || "").trim(),
+  };
+}
+
+function shuffleRows_(rows) {
+  const result = rows.slice();
+
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    const current = result[index];
+    result[index] = result[swapIndex];
+    result[swapIndex] = current;
+  }
+
+  return result;
 }
 
 function createJsonResponse(payload) {

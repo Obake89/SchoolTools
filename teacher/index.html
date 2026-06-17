@@ -41,6 +41,7 @@
                 <select id="tool-select" name="tool">
                   <option value="number-line">Oś liczbowa</option>
                   <option value="multiplication-game">Tabliczka mnożenia</option>
+                  <option value="space-quiz">Kosmiczny quiz</option>
                   <option value="linear-equations">Równania liniowe</option>
                 </select>
               </label>
@@ -143,6 +144,57 @@
                     max="20"
                     value="3"
                   />
+                </label>
+              </div>
+            </section>
+
+            <section
+              id="space-quiz-settings"
+              class="tool-settings"
+              data-tool-settings="space-quiz"
+              hidden
+            >
+              <div class="grid grid--2">
+                <label class="field">
+                  <span>Klasa pytań</span>
+                  <select id="quiz-grade-select" name="quizGrade">
+                    <option value="4" selected>4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>Dział</span>
+                  <select
+                    id="quiz-topic-input"
+                    name="quizTopic"
+                  >
+                    <option value="Trening">Trening</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>Liczba pytań</span>
+                  <select id="quiz-question-count-select" name="quizQuestionCount">
+                    <option value="5">5</option>
+                    <option value="8" selected>8</option>
+                    <option value="10">10</option>
+                    <option value="12">12</option>
+                    <option value="15">15</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>Czas na meteoryt</span>
+                  <select id="seconds-per-question-select" name="secondsPerQuestion">
+                    <option value="5">5 s</option>
+                    <option value="7" selected>7 s</option>
+                    <option value="9">9 s</option>
+                    <option value="12">12 s</option>
+                  </select>
                 </label>
               </div>
             </section>
